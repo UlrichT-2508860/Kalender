@@ -1404,11 +1404,8 @@ void remove_appointments_in_range(st_root* p_root)
 
 		//Check if end-date is earlier than start-date.
 		if (end_date_in_days < start_date_in_days)
-		//if ((end_date.year < start_date.year) ||
-		//	((end_date.year == start_date.year) && (end_date.month < start_date.month)) ||
-		//	((end_date.year == start_date.year) && (end_date.month == start_date.month) && (end_date.day < start_date.day)))
 		{
-			//dates are NOK, repeat while loop until correct dates filled in.
+			//dates are NOT OK, repeat while loop until correct dates filled in.
 			printf("END-DATE OCCURS EARLIER THAN START-DATE!\n");
 			printf("Please try again (press enter).");
 			flush_keyboard_input();	//wait for enter and flush garbage input
@@ -1416,8 +1413,8 @@ void remove_appointments_in_range(st_root* p_root)
 		else
 		{
 			//dates are OK, break off while loop and continue
-			start_year_month_in_days = date_to_int(start_date.year, start_date.month, 0);	//create also the date in days of the current year+month
-			end_year_month_in_days = date_to_int(end_date.year, end_date.month, 0);			//create also the date in days of the current çyear+month
+			start_year_month_in_days = date_to_int(start_date.year, start_date.month, 0);	//create also the start date in days of the current year+month
+			end_year_month_in_days = date_to_int(end_date.year, end_date.month, 0);			//create also the end date in days of the current year+month
 			dates_valid = 1;
 		}
 	} while (dates_valid == 0);
@@ -1460,41 +1457,18 @@ void remove_appointments_in_range(st_root* p_root)
 							while (p_appointment != NULL)
 							{
 								
-								//if there are more appointments left, free the first struct and go to next
-								if (p_appointment->pl_next_appointment != NULL)
-								{
-									st_appointment* backup_pl_next_appointment = p_appointment->pl_next_appointment;
-
-									//TODO: FREE MALLOC STRINGS
-
+								//if there is an appointment found, delete it and goto next
+								st_appointment* backup_pl_next_appointment = p_appointment->pl_next_appointment;
 #ifdef USE_MALLOCS
-									//before we free the allocated appointment, free first the allocated strings
-									// TODO MAKE THIS A FUNCTION									
-									free(p_appointment->p_title);
-									free(p_appointment->p_description);
-									free(p_appointment->p_location_description);
+								//before we free the allocated appointment, free first the allocated strings
+								// TODO MAKE THIS A FUNCTION									
+								free(p_appointment->p_title);
+								free(p_appointment->p_description);
+								free(p_appointment->p_location_description);
 #endif
-
-									free(p_appointment);
-									p_appointment = backup_pl_next_appointment;
-								}
-		
-								else
-								{	//when one appointment is left, remove the struct
-#ifdef USE_MALLOCS
-									//before we free the allocated appointment, free first the allocated strings
-
-									free(p_appointment->p_title);
-									free(p_appointment->p_description);
-									free(p_appointment->p_location_description);
-
-
-#endif
-									free(p_appointment);
-									p_appointment = NULL;
-								}
-
-
+								free(p_appointment);
+								p_appointment = backup_pl_next_appointment;
+								
 								found++;
 							}
 						
@@ -1602,36 +1576,22 @@ void remove_tree(st_root* p_root, int print_details)
 			while (p_day != NULL)
 			{
 				
-
 				st_appointment* p_appointment = p_day->pl_appointment;
 				while (p_appointment != NULL)
 				{
-					//if there are more appointments left, free the first struct and go to next
-					if (p_appointment->pl_next_appointment != NULL)
-					{
-						st_appointment* backup_p_appointment = p_appointment->pl_next_appointment;
-
-						//TODO: FREE MALLOC STRINGS 
+		
+					//if there is an appointment found, delete it and goto next
+					st_appointment* backup_p_appointment = p_appointment->pl_next_appointment;
 #ifdef USE_MALLOCS
-						//before we free the allocated appointment,free first the allocated strings
-						//TODO MAKE THIS A FUNCITON
-						free(p_appointment->p_title);
-						free(p_appointment->p_description);
-						free(p_appointment->p_location_description);
-						
-						
+					//before we free the allocated appointment,free first the allocated strings
+					//TODO MAKE THIS A FUNCTION
+					free(p_appointment->p_title);
+					free(p_appointment->p_description);
+					free(p_appointment->p_location_description);
 #endif
-
-						free(p_appointment);
-						p_appointment = backup_p_appointment;
-					}
-					//when one appointment is left, remove the struct
-					else
-					{
-						free(p_appointment);
-						p_appointment = NULL;
-					}
-
+					free(p_appointment);
+					p_appointment = backup_p_appointment;
+					
 				}
 				//if there are more days left, free the first struct and go to next
 				if (p_day->pl_next_day != NULL)
@@ -1701,156 +1661,10 @@ void init_root(st_root* p_root)
 
 }
 
-void init_root_OLD(st_root* p_root)
-{
-
-	//st_root *p = malloc(sizeof(st_root));
-	//p->pl_year = NULL;
-
-	//Init first year struct
-	p_root->pl_year = malloc(sizeof(st_year));
-	p_root->pl_year->year = 0;
-	p_root->pl_year->pl_next_year = NULL;	//preset next ll_node to NULL.
-
-	//Init first month struct
-	p_root->pl_year->pl_month = malloc(sizeof(st_month));
-	p_root->pl_year->pl_month->month = 0;
-	p_root->pl_year->pl_month->pl_next_month = NULL;	//preset next ll_node to NULL.
-
-	//Init first day struct
-	p_root->pl_year->pl_month->pl_day = malloc(sizeof(st_day));
-	p_root->pl_year->pl_month->pl_day->day = 0;
-	p_root->pl_year->pl_month->pl_day->pl_next_day = NULL;	  //preset next ll_node to NULL.
 
 
-	//Init first appointment struct
-	p_root->pl_year->pl_month->pl_day->pl_appointment = malloc(sizeof(st_appointment));
-#if 1
-	memset(&p_root->pl_year->pl_month->pl_day->pl_appointment->date,
-			0,
-			sizeof(st_date));
-#else
-	p_root->pl_year->pl_month->pl_day->pl_appointment->date.day = 0;
-	p_root->pl_year->pl_month->pl_day->pl_appointment->date.month = 0;
-	p_root->pl_year->pl_month->pl_day->pl_appointment->date.year = 0;
-#endif
-	memset(&p_root->pl_year->pl_month->pl_day->pl_appointment->time_start, 0, sizeof(st_time));
-	memset(&p_root->pl_year->pl_month->pl_day->pl_appointment->time_end, 0, sizeof(st_time));
-	p_root->pl_year->pl_month->pl_day->pl_appointment->pl_next_appointment = NULL;
 
 
-}
-
-
-///
-///  @brief   This function prints the main menu. The user also inputs the option.
-///  @param   void
-///  @return  option
-/// /
-//int write_menu_and_get_option(void)
-//{
-//	printf("What would you like to do?\n"
-//			"[0] Exit Program\n"
-//			"[1] Add singular appointment\n"
-//			"[2] Remove appointments in a range\n"
-//			"[3] Empty Calendar\n"
-//			"[4] Write out complete Calendar\n"
-//			"[5] Write out appointments in a range\n"
-//			"[6] Write out appointments based on textual matching\n"
-//			"[7] Import Calendar\n"
-//			"[8] Export Calendar\n");
-//
-//	int choice;
-//	if (scanf("%d", &choice) != 1)
-//	{
-//		//scanf went wrong, return illegal value
-//		choice = -1;
-//	}
-//	//flush all remaining characters for next input
-//	char c;
-//	do
-//	{
-//		c = getchar();
-//	} while (c != '\n');
-//		
-//	//while (c != '\n' && c != EOF)
-//
-//	//c = getchar();
-//	//while (c != '\n' && c != EOF) 
-//	//{
-//	//	c = getchar();
-//	//}
-//
-//
-//	//while ((c = getchar()) != '\n' && c != EOF);
-//	//getchar();
-//
-//	return choice;
-//	}
-//
-///**
-//* @brief	This function processes the give integer.
-//* @param	Choice (int)
-//* @return	Processed choice (int)
-//*/
-//int process_menu_option(st_root* p_root, int choice)
-//{
-//	switch (choice)
-//	{
-//	case EXIT_PROGRAM:
-//
-//		printf("Exiting...");
-//
-//		return 0;
-//
-//	case CREATE_APPOINTMENT:
-//
-//		add_appointment_manually();
-//		break;
-//
-//	case REMOVE_APPOINTMENT_RANGE:
-//
-//		break;
-//
-//	case EMPTY_CALENDAR:
-//
-//		break;
-//
-//	case DISPLAY_CALENDAR:
-//
-//		print_appointments_from_tree(p_root);
-//
-//		break;
-//
-//	case DISPLAY_CALENDAR_RANGE:
-//
-//		break;
-//
-//	case WRITE_CALENDAR_MATCH:
-//
-//		break;
-//
-//	case IMPORT_CALENDAR:
-//
-//		//import_calendar_file("C:\\Users\\ulric\\OneDrive\\Dokumente\\Ulrich Tuts\\Universiteit\\2025 - 2026\\Problem Solving\\Kwartiel 2\\Individueel project\\Kalender\\Kalender_data.txt");
-//		import_calendar_file(p_root, "C:\\Program Files Ulrich\\Kalender_data.txt");
-//		printf("import done.");
-//		break;
-//
-//	case EXPORT_CALENDAR: 
-//
-//		break;
-//
-//	default:
-//		printf("Invalid input! Expecting 0-8!\n");
-//
-//	}
-//	
-//	return choice;
-//
-//
-//
-//}
 
 
 // TODO: import and export file
@@ -1858,5 +1672,6 @@ void init_root_OLD(st_root* p_root)
 // TODO: print calendar function
 // TODO: remove calendar function
 // TODO: what to do with same time appoitnment
-
+// TODO: CATCH MALLOC ERRORS
+// TODO: CHECK FGETS AND SCANF ERRORS (LIKE IF ITS EMPTY OR IF IT HAS EXCEEDED)
 
