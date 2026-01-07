@@ -134,7 +134,7 @@ int generate_id(void);
 void init_root(st_root* p_root);
 //int write_menu_and_get_option(void);
 //int process_menu_option(st_root* p_root, int choice);
-void print_calendar_in_range(st_root* p_root);
+void print_appointments_in_range(st_root* p_root);
 void print_appointments_with_match(st_root* p_root);
 
 void import_calendar_file(st_root* p_root, char* filename);
