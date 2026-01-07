@@ -3,12 +3,16 @@
 
 
 //define constants
-#define MAX_TITLE_LENGTH 100
-#define MAX_DESCRIPTION_LENGTH 300
-#define MAX_LOCATION_LENGTH 100
+#define MAX_TITLE_LENGTH (100 + 1)  //one extra character for holding the nullbyte
+#define MAX_DESCRIPTION_LENGTH (300 + 1)
+#define MAX_LOCATION_LENGTH (100 + 1)
+#define DATE_STR_LENGTH (10)	//import file: character size of date.
+#define TIME_STR_LENGTH (5)		//import file: character size of time.
+#define ID_STR_LENGTH	(16)	//import file: character size of unique ID
+
 #define FILE_DELIMITER ";"
 
-//#define USE_MALLOCS
+#define USE_MALLOCS	//to use mem-allocated string messages in the appointment
 
 //initialize the structs
 
@@ -114,6 +118,8 @@ enum months
 enum error_codes
 {
 	IMPORT_ERROR_TITLE = 1,
+	IMPORT_ERROR_DESCRIPTION,
+	IMPORT_ERROR_LOCATION,
 	IMPORT_ERROR_DATE,
 	IMPORT_ERROR_START_TIME,
 	IMPORT_ERROR_END_TIME,
