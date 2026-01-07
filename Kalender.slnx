@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Kalender/Kalender.vcxproj" Id="46767f8c-6ff1-4ae2-8a4f-ed34475f3e95" />
+</Solution>
