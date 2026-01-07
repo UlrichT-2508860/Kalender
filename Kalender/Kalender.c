@@ -678,50 +678,6 @@ void print_appointment_details(st_appointment* p_appointment)
 
 
 
-void print_appointments_from_tree(st_root* p_root)
-{
-	st_year* p_year = p_root->pl_year;
-
-	if (p_year == NULL)
-	{
-		printf("Tree is empty! Nothing to display!\n");
-		return;
-	}
-
-	while (p_year != NULL)
-	{
-		st_month* p_month = p_year->pl_month;
-		while (p_month != NULL)
-		{
-			st_day* p_day = p_month->pl_day;
-			while (p_day != NULL)
-			{
-				printf("Date: %04d/%02d/%02d\n", p_year->year, p_month->month, p_day->day);
-				st_appointment* p_appointment = p_day->pl_appointment;
-				while (p_appointment != NULL)
-				{
-					print_appointment_details(p_appointment);
-					//printf("\n");
-					//printf(" Title: %s\n", p_appointment->title);
-					//printf("\n");
-					//printf("  Description: %s\n", p_appointment->description);
-					//printf("  Location: %s\n", p_appointment->location_description);
-					////printf("  Date: %04d/%02d/%02d\n", p_appointment->date.year, p_appointment->date.month, p_appointment->date.day);
-					//printf("  Start-time: %02d:%02d\n", p_appointment->time_start.hour, p_appointment->time_start.minute);
-					//printf("  End-time: %02d:%02d\n", p_appointment->time_end.hour, p_appointment->time_end.minute);
-					//printf("\n");
-					p_appointment = p_appointment->pl_next_appointment;
-
-				}
-				p_day = p_day->pl_next_day;
-			}
-			p_month = p_month->pl_next_month;
-		}
-		p_year = p_year->pl_next_year;
-	}
-}
-
-
 void print_appointments_with_match(st_root* p_root)
 {
 	st_year* p_year = p_root->pl_year;
@@ -775,7 +731,6 @@ void print_appointments_with_match(st_root* p_root)
 					//if (strstr(tolower(p_appointment->p_title), tolower(match_string)))
 					if (strstr(p_appointment->p_title, match_string))
 					{
-
 #else
 					if (strstr(tolower(p_appointment->title), tolower(match_string)))
 					{
@@ -783,15 +738,6 @@ void print_appointments_with_match(st_root* p_root)
 						printf("Date: %04d/%02d/%02d\n", p_year->year, p_month->month, p_day->day);
 						print_appointment_details(p_appointment);
 						found = 1;
-						//printf("\n");
-						//printf(" Title: %s\n", p_appointment->title);
-						//printf("\n");
-						//printf("  Description: %s\n", p_appointment->description);
-						//printf("  Location: %s\n", p_appointment->location_description);
-						////printf("  Date: %04d/%02d/%02d\n", p_appointment->date.year, p_appointment->date.month, p_appointment->date.day);
-						//printf("  Start-time: %02d:%02d\n", p_appointment->time_start.hour, p_appointment->time_start.minute);
-						//printf("  End-time: %02d:%02d\n", p_appointment->time_end.hour, p_appointment->time_end.minute);
-						//printf("\n");
 					}
 					p_appointment = p_appointment->pl_next_appointment;
 
@@ -809,79 +755,66 @@ void print_appointments_with_match(st_root* p_root)
 	}
 }
 
-void print_calendar_in_range(st_root* p_root)
+/**
+* @brief	This function prints all appointments (from the tree) or all the appointments in a given range.
+* @param	p_root		pointer to the tree 
+* @param	print_all	0 = ask user for entering a date-range and print only those appointments meeting the range,
+*						NOT 0 = print all appointments.
+* @return	void
+*/
+void print_appointments_in_range_v2(st_root* p_root, int print_all)
 {
 	st_date start_date;
 	st_date end_date;
-	int dates_valid=0;
-	int start_date_in_days;
-	int start_year_month_in_days;
-	int end_date_in_days;
-	int end_year_month_in_days;
-	//if tree is empty
+	int dates_valid = 0;
+	int start_date_in_days=0;
+	int start_year_month_in_days = 0;
+	int end_date_in_days = 0;
+	int end_year_month_in_days = 0;
+	
 	if (p_root->pl_year == NULL)
-	{
+	{	//if tree is empty
 		printf("Tree is empty! Nothing to print!\n");
 		return;
 	}
 
-	do
+	//preset structures to 0, to avoid garbage in case of print_all
+	memset(&start_date, 0, sizeof(start_date));	
+	memset(&end_date, 0, sizeof(end_date));
+
+	if (print_all == 0)
 	{
-		//get the start-date
-		user_request_date(&start_date, "Please give the date where you want to start searching: (YYYY/MM/DD) ");
-
-		//printf("Please give the date where you want to start searching: (YYYY/MM/DD) ");
-		//scanf("%d/%d/%d", &start_date.year, &start_date.month, &start_date.day);
-		//flush_keyboard_input();	//flush input
-		////check for invalid input
-		//while (is_date_valid(&start_date) != 0)
-		//{
-		//	printf("INVALID DATE! USE THE GIVEN FORMAT: (YYYY/MM/DD) ");
-		//	scanf("%d/%d/%d", &start_date.year, &start_date.month, &start_date.day);
-		//	flush_keyboard_input();	//flush garbage input
-		//}
-
-		//get the end-date
-		user_request_date(&end_date, "Please give the date where you want to stop searching: (YYYY/MM/DD) ");
-
-		//printf("Please give the date where you want to stop searching: (YYYY/MM/DD) ");
-		//scanf("%d/%d/%d", &end_date.year, &end_date.month, &end_date.day);
-		//flush_keyboard_input();	//flush input
-		////check for invalid input
-		//while (is_date_valid(&end_date) != 0)
-		//{
-		//	printf("INVALID DATE! USE THE GIVEN FORMAT: (YYYY/MM/DD) ");
-		//	scanf("%d/%d/%d", &end_date.year, &end_date.month, &end_date.day);
-		//	flush_keyboard_input();	//flush garbage input
-		//}
-		start_date_in_days = date_to_int(start_date.year, start_date.month, start_date.day);
-		end_date_in_days = date_to_int(end_date.year, end_date.month, end_date.day);
-		//Check if end-date is earlier than start-date.
-		if (end_date_in_days < start_date_in_days)
-		/*if ( (end_date.year < start_date.year) ||
-			((end_date.year == start_date.year) && (end_date.month < start_date.month)) ||
-			((end_date.year == start_date.year) && (end_date.month == start_date.month) && (end_date.day< start_date.day)) )*/
+		//TODO: MAKE THIS A FUNCTION, MIGHT ALSO BE USED FOR DELETE IN RANGE
+		do
 		{
-			//dates are NOK, repeat while loop until correct dates filled in.
-			printf("END-DATE OCCURS EARLIER THAN START-DATE!\n");
-			printf("Please try again (press enter).");
-			flush_keyboard_input();	//wait for enter and flush garbage input
-		}
-		else
-		{
-			//dates are OK, break off while loop and continue
-			start_year_month_in_days = date_to_int(start_date.year, start_date.month, 0);
-			end_year_month_in_days = date_to_int(end_date.year, end_date.month, 0);
+			//get the start-date
+			user_request_date(&start_date, "Please give the date where you want to start searching: (YYYY/MM/DD) ");
+			//get the end-date
+			user_request_date(&end_date, "Please give the date where you want to stop searching: (YYYY/MM/DD) ");
 
+			start_date_in_days = date_to_int(start_date.year, start_date.month, start_date.day);
+			end_date_in_days = date_to_int(end_date.year, end_date.month, end_date.day);
+			//Check if end-date is earlier than start-date.
+			if (end_date_in_days < start_date_in_days)
+			{
+				//dates are NOT OK, repeat while loop until correct dates filled in.
+				printf("END-DATE OCCURS EARLIER THAN START-DATE!\n");
+				printf("Please try again (press enter).");
+				flush_keyboard_input();	//wait for enter and flush garbage input
+			}
+			else
+			{
+				//dates are OK, break off while loop and continue
+				start_year_month_in_days = date_to_int(start_date.year, start_date.month, 0);
+				end_year_month_in_days = date_to_int(end_date.year, end_date.month, 0);
+				dates_valid = 1;
+			}
+		} while (dates_valid == 0);
+	}
 
-			dates_valid = 1;
-		}
-	} while (dates_valid == 0);
+	//if print_all==0 -> only print the appointments whose date are in range
+	//if print_all!=0 -> print all the appointments whose date are in range
 
-	//flush '\n'
-	
-
-	//only print the appointments whose date are in range
 	st_year* p_year = p_root->pl_year;
 	//set flag in case nothing was found
 	int found = 0;
@@ -889,42 +822,37 @@ void print_calendar_in_range(st_root* p_root)
 	//browse through years, months and days
 	while (p_year != NULL)
 	{
-		if ((start_date.year <= p_year->year) && (p_year->year <= end_date.year))
+		if ((print_all != 0) ||															//if print all is wanted or..
+			((start_date.year <= p_year->year) && (p_year->year <= end_date.year)))		//...If year in range.
 		{
 			st_month* p_month = p_year->pl_month;
 			while (p_month != NULL)
 			{
-				int current_year_month_in_days = date_to_int(p_year->year, p_month->month, 0);
-				if ((start_year_month_in_days <= current_year_month_in_days) && (current_year_month_in_days <= end_year_month_in_days))
-				//if	((start_date.month <= p_month->month) && (p_month->month <= end_date.month))
+				int current_year_month_in_days = 0;
+				if (print_all == 0)
+				{
+					current_year_month_in_days = date_to_int(p_year->year, p_month->month, 0);
+				}
+				if ((print_all != 0) ||																										//if print all is wanted or..
+					((start_year_month_in_days <= current_year_month_in_days) && (current_year_month_in_days <= end_year_month_in_days)))	//...if year+month in range
 				{
 					st_day* p_day = p_month->pl_day;
 					while (p_day != NULL)
 					{
-						int current_date_in_days = current_year_month_in_days + p_day->day;
-						if ((start_date_in_days <= current_date_in_days) && (current_date_in_days <= end_date_in_days))
-						//if ((start_date.day <= p_day->day) && (p_day->day <= end_date.day))
+						int current_date_in_days = 0;
+						if (print_all == 0)
+						{
+							current_date_in_days = current_year_month_in_days + p_day->day;
+						}
+						if ((print_all != 0) ||																				//if print all is wanted or..
+							((start_date_in_days <= current_date_in_days) && (current_date_in_days <= end_date_in_days)))	//...if year+month+day in range
 						{
 							printf("Date: %04d/%02d/%02d\n\n", p_year->year, p_month->month, p_day->day);
 							st_appointment* p_appointment = p_day->pl_appointment;
 							while (p_appointment != NULL)
 							{
-								//if (start_date.year <= p_year->year <= end_date.year)	//note: this doesn't work well in C.. Why##??@@!! 
-
-								//if (((start_date.year <= p_year->year) && (p_year->year <= end_date.year)) &&
-								//	((start_date.month <= p_month->month) && (p_month->month <= end_date.month))&&
-								//	((start_date.day <= p_day->day) && (p_day->day <= end_date.day)))
-								{
-									
-									print_appointment_details(p_appointment);
-									//printf(" Title: %s\n\n", p_appointment->title);
-									//printf("  Description: %s\n", p_appointment->description);
-									//printf("  Location: %s\n", p_appointment->location_description);
-									////printf("  Date: %04d/%02d/%02d\n", p_appointment->date.year, p_appointment->date.month, p_appointment->date.day);
-									//printf("  Start-time: %02d:%02d\n", p_appointment->time_start.hour, p_appointment->time_start.minute);
-									//printf("  End-time: %02d:%02d\n\n", p_appointment->time_end.hour, p_appointment->time_end.minute);
-									found = 1;
-								}
+								print_appointment_details(p_appointment);
+								found = 1;
 								p_appointment = p_appointment->pl_next_appointment;
 							}
 						}
@@ -937,11 +865,144 @@ void print_calendar_in_range(st_root* p_root)
 		p_year = p_year->pl_next_year; //goto next year in linked list
 	}
 
-	if (found == 0)
-	{
+	if ((found == 0) && (print_all == 0))
+	{	//in case nothing was found while searching in a range
 		printf("No appointments found in this range!\n");
 	}
 }
+
+
+
+
+
+void print_appointments_in_range(st_root* p_root)
+{
+	print_appointments_in_range_v2(p_root, 0);
+	//st_date start_date;
+	//st_date end_date;
+	//int dates_valid=0;
+	//int start_date_in_days;
+	//int start_year_month_in_days;
+	//int end_date_in_days;
+	//int end_year_month_in_days;
+	////if tree is empty
+	//if (p_root->pl_year == NULL)
+	//{
+	//	printf("Tree is empty! Nothing to print!\n");
+	//	return;
+	//}
+
+	//do
+	//{
+	//	//get the start-date
+	//	user_request_date(&start_date, "Please give the date where you want to start searching: (YYYY/MM/DD) ");
+	//	//get the end-date
+	//	user_request_date(&end_date, "Please give the date where you want to stop searching: (YYYY/MM/DD) ");
+
+	//	start_date_in_days = date_to_int(start_date.year, start_date.month, start_date.day);
+	//	end_date_in_days = date_to_int(end_date.year, end_date.month, end_date.day);
+	//	//Check if end-date is earlier than start-date.
+	//	if (end_date_in_days < start_date_in_days)
+	//	{
+	//		//dates are NOT OK, repeat while loop until correct dates filled in.
+	//		printf("END-DATE OCCURS EARLIER THAN START-DATE!\n");
+	//		printf("Please try again (press enter).");
+	//		flush_keyboard_input();	//wait for enter and flush garbage input
+	//	}
+	//	else
+	//	{
+	//		//dates are OK, break off while loop and continue
+	//		start_year_month_in_days = date_to_int(start_date.year, start_date.month, 0);
+	//		end_year_month_in_days = date_to_int(end_date.year, end_date.month, 0);
+	//		dates_valid = 1;
+	//	}
+	//} while (dates_valid == 0);
+
+
+	////only print the appointments whose date are in range
+	//st_year* p_year = p_root->pl_year;
+	////set flag in case nothing was found
+	//int found = 0;
+
+	////browse through years, months and days
+	//while (p_year != NULL)
+	//{
+	//	if ((start_date.year <= p_year->year) && (p_year->year <= end_date.year))
+	//	{
+	//		st_month* p_month = p_year->pl_month;
+	//		while (p_month != NULL)
+	//		{
+	//			int current_year_month_in_days = date_to_int(p_year->year, p_month->month, 0);
+	//			if ((start_year_month_in_days <= current_year_month_in_days) && (current_year_month_in_days <= end_year_month_in_days))
+	//			//if	((start_date.month <= p_month->month) && (p_month->month <= end_date.month))
+	//			{
+	//				st_day* p_day = p_month->pl_day;
+	//				while (p_day != NULL)
+	//				{
+	//					int current_date_in_days = current_year_month_in_days + p_day->day;
+	//					if ((start_date_in_days <= current_date_in_days) && (current_date_in_days <= end_date_in_days))
+	//					//if ((start_date.day <= p_day->day) && (p_day->day <= end_date.day))
+	//					{
+	//						printf("Date: %04d/%02d/%02d\n\n", p_year->year, p_month->month, p_day->day);
+	//						st_appointment* p_appointment = p_day->pl_appointment;
+	//						while (p_appointment != NULL)
+	//						{
+	//							print_appointment_details(p_appointment);
+	//							found = 1;
+	//							p_appointment = p_appointment->pl_next_appointment;
+	//						}
+	//					}
+	//					p_day = p_day->pl_next_day;	//goto next day in linked list
+	//				}
+	//			}
+	//			p_month = p_month->pl_next_month; //goto next month in linked list
+	//		}
+	//	}
+	//	p_year = p_year->pl_next_year; //goto next year in linked list
+	//}
+
+	//if (found == 0)
+	//{
+	//	printf("No appointments found in this range!\n");
+	//}
+}
+
+void print_appointments_from_tree(st_root* p_root)
+{
+	print_appointments_in_range_v2(p_root, 1);
+	//st_year* p_year = p_root->pl_year;
+
+	//if (p_year == NULL)
+	//{
+	//	printf("Tree is empty! Nothing to display!\n");
+	//	return;
+	//}
+
+	//while (p_year != NULL)
+	//{
+	//	st_month* p_month = p_year->pl_month;
+	//	while (p_month != NULL)
+	//	{
+	//		st_day* p_day = p_month->pl_day;
+	//		while (p_day != NULL)
+	//		{
+	//			printf("Date: %04d/%02d/%02d\n", p_year->year, p_month->month, p_day->day);
+	//			st_appointment* p_appointment = p_day->pl_appointment;
+	//			while (p_appointment != NULL)
+	//			{
+	//				print_appointment_details(p_appointment);
+	//				p_appointment = p_appointment->pl_next_appointment;
+	//			}
+	//			p_day = p_day->pl_next_day;
+	//		}
+	//		p_month = p_month->pl_next_month;
+	//	}
+	//	p_year = p_year->pl_next_year;
+	//}
+}
+
+
+
 
 void import_calendar_file(st_root* p_root, char* default_filename)
 {

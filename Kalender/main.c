@@ -99,7 +99,7 @@ int process_menu_option(st_root* p_root, int choice)
 
 	case DISPLAY_CALENDAR_RANGE:
 
-		print_calendar_in_range(p_root);
+		print_appointments_in_range(p_root);
 		break;
 
 	case WRITE_CALENDAR_MATCH:
