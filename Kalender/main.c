@@ -12,8 +12,17 @@
 void clearscreen(void)
 {	//with the help of ANSI escape codes.
 	//source: https://stackoverflow.com/questions/37774983/clearing-the-screen-by-printing-a-character
-	printf("\033[2J\033[H");
+	printf("\033[2J\033[H"); //NOTE: this doesn't really "clear" the terminal put prints enough enters so the terminal is empty
+							 //you can still scroll up to see the history of what went down.
 	//fflush(stdout);
+	
+	//with the help of system commands, these vary from OS to OS though
+	//source: https://www.designgurus.io/answers/detail/how-to-clear-in-c-programming
+#ifdef _WIN32
+	system("cls");
+#else 
+	system("clear"); //for linux
+#endif
 }
 
 /**
@@ -21,7 +30,7 @@ void clearscreen(void)
  * @param   void
  * @return  option (int) The returned option the user gave as input
  */
-int write_menu_and_get_option(void)
+static int write_menu_and_get_option(void)
 {
 
 	printf("What would you like to do?\n"
@@ -58,7 +67,7 @@ int write_menu_and_get_option(void)
 
 	//while ((c = getchar()) != '\n' && c != EOF);
 	//getchar();
-
+	
 	return choice;
 }
 
@@ -74,7 +83,7 @@ int process_menu_option(st_root* p_root, int choice)
 	{
 	case EXIT_PROGRAM:
 
-		printf("Exiting...");
+		printf("Exiting...\n");
 
 		return 0;
 
@@ -160,7 +169,7 @@ int main(void)
 		//wait for user input to return to menu
 		if (processed_choice != EXIT_PROGRAM)
 		{
-			printf("Press any key to return to menu.\n");
+			printf("Press ENTER to return to menu.\n");
 			//getchar();
 			//flush all remaining characters for next input
 			char c;
@@ -175,8 +184,6 @@ int main(void)
 
 	} while (processed_choice != 0);
 		
-
-
 
 
 	return 0;

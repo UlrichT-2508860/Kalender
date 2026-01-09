@@ -61,6 +61,19 @@ char* my_strtok(char* str, const char* delimiter)
 }
 
 /**
+* @brief	This function transforms a given string into it's lowercase version. This will be used for the matching string function
+* @param	string (char*) The address of a string
+* @return	void
+*/
+void string_to_lower(char* string)
+{
+	for (int i = 0; i < strlen(string); i++)
+	{
+		string[i] = tolower(string[i]);
+	}
+}
+
+/**
 * @brief	This function will generate an ID based on the current time
 * @param	void
 * @return	the id (int) 
@@ -284,7 +297,7 @@ int is_time_valid(st_time* p_time)
  */
 int is_end_time_valid_to_start_time(st_time* p_end_time, st_time* p_start_time)
 {
-	if (p_end_time->hour * 60 + p_end_time->minute >=
+	if (p_end_time->hour * 60 + p_end_time->minute >
 		p_start_time->hour * 60 + p_start_time->minute)
 	{
 		return 0;
@@ -790,6 +803,7 @@ void print_appointments_with_match(st_root* p_root)
 	//remove the '\n'
 	match_string[strlen(match_string) - 1] = '\0';
 
+	string_to_lower(match_string); //lower the match string (case-insensitive)
 	int found = 0;
 	while (p_year != NULL)
 	{
@@ -806,8 +820,11 @@ void print_appointments_with_match(st_root* p_root)
 					//if match string is present, display appointment
 #ifdef USE_MALLOCS
 					//TODO: MAKE THIS CASE INSENSITIVE
-					//if (strstr(tolower(p_appointment->p_title), tolower(match_string)))
-					if (strstr(p_appointment->p_title, match_string))
+					char lowered_title[MAX_TITLE_LENGTH];
+					strcpy(lowered_title, p_appointment->p_title);
+					string_to_lower(lowered_title);
+					if (strstr(lowered_title, match_string))
+					//if (strstr(p_appointment->p_title, match_string))
 					{
 #else
 					if (strstr(tolower(p_appointment->title), tolower(match_string)))
@@ -1132,7 +1149,7 @@ void import_calendar_file(st_root* p_root, char* default_filename)
 
 
 	//first delete current tree
-	remove_tree(p_root, 0);
+	remove_appointments_in_range_or_all(p_root, 1, 0);
 
 	//get each line (entry) and convert to struct
 	while (fgets(s_line, sizeof(s_line), h_calendar_file) != NULL)
@@ -1286,9 +1303,30 @@ void import_calendar_file(st_root* p_root, char* default_filename)
 * @param	filename (char*) A pointer to the filename
 * @return	void
 */
-void export_calendar_file(st_root* p_root, char* filename)
+void export_calendar_file(st_root* p_root, char* default_filename)
 {
-	FILE* h_calendar_file = fopen(filename, "w");
+
+	char tmp_filename[512];	//to store eventually manually entered filepath
+
+	if (default_filename == NULL)
+	{	//If no filename is given, request the filepath+filename from user:
+		printf("Please give the path to your file:");
+		fgets(tmp_filename, sizeof(tmp_filename), stdin);
+		tmp_filename[strlen(tmp_filename) - 1] = '\0';
+		default_filename = tmp_filename;
+	}
+	else
+	{	//We still offer the choice to override the default filename
+		printf("Please give the path to your file or press enter to use the default calendar-file (%s) : ", default_filename);
+		fgets(tmp_filename, sizeof(tmp_filename), stdin);
+		if (tmp_filename[0] != '\n')
+		{
+			//user has specified a new filename, so use it.
+			tmp_filename[strlen(tmp_filename) - 1] = '\0';//remove \n
+			default_filename = tmp_filename;
+		}
+	}
+	FILE* h_calendar_file = fopen(default_filename, "w");
 
 	st_year* p_year = p_root->pl_year;
 
@@ -1443,18 +1481,19 @@ void add_appointment_manually(st_root* p_root)
 	//new_appointment.location_description[strcspn(new_appointment.location_description, "\n")] = '\0';
 #endif
 	//get date
-	printf("Give the date of your appointment. (Format: YYYY/MM/DD) : ");
-	//scanf("%d", &new_appointment.date.year);
-	scanf("%d/%d/%d", &new_appointment.date.year, &new_appointment.date.month, &new_appointment.date.day);
+	user_request_date(&new_appointment.date, "Give the date of your appointment. (Format: YYYY/MM/DD) : ");
+	//printf("Give the date of your appointment. (Format: YYYY/MM/DD) : ");
+	////scanf("%d", &new_appointment.date.year);
+	//scanf("%d/%d/%d", &new_appointment.date.year, &new_appointment.date.month, &new_appointment.date.day);
 
-	//in case of invalid date input
-	while (is_date_valid(&new_appointment.date) != 0)
-	{
-		//flush garbage input
-		flush_keyboard_input();
-		printf("INVALID DATE. USE THE GIVEN FORMAT: (YYYY/MM/DD) ");
-		 scanf("%d/%d/%d", &new_appointment.date.year, &new_appointment.date.month, &new_appointment.date.day);
-	}
+	////in case of invalid date input
+	//while (is_date_valid(&new_appointment.date) != 0)
+	//{
+	//	//flush garbage input
+	//	flush_keyboard_input();
+	//	printf("INVALID DATE. USE THE GIVEN FORMAT: (YYYY/MM/DD) ");
+	//	 scanf("%d/%d/%d", &new_appointment.date.year, &new_appointment.date.month, &new_appointment.date.day);
+	//}
 
 	//get specific time when appointment starts
 	printf("Give the specific time when your appointment starts. (Format: HH:MM) : ");
@@ -1475,7 +1514,8 @@ void add_appointment_manually(st_root* p_root)
 
 	//in case of invalid time input OR time-end is earlier than time-start
 	while ((is_time_valid(&new_appointment.time_start) != 0) ||
-		new_appointment.time_end.hour * 60 + new_appointment.time_end.minute < new_appointment.time_start.hour * 60 + new_appointment.time_start.minute)
+		is_end_time_valid_to_start_time(&new_appointment.time_end, &new_appointment.time_start))
+		//new_appointment.time_end.hour * 60 + new_appointment.time_end.minute < new_appointment.time_start.hour * 60 + new_appointment.time_start.minute)
 	{
 		//flush garbage input
 		flush_keyboard_input();
@@ -1488,7 +1528,7 @@ void add_appointment_manually(st_root* p_root)
 		//when time-end is earlier than time-start:
 		else 
 		{
-			printf("TIME-END OCCURS EARLIER THAN TIME-START!\n");
+			printf("TIME-END OCCURS EARLIER THAN OR AT TIME-START!\n");
 			printf("Please try again: (HH:MM):");
 		}
 		
@@ -1508,12 +1548,14 @@ void add_appointment_manually(st_root* p_root)
 
 /**
 * @brief	This function removes all appointments (from the tree) or all the appointments in a given range.
-* @param	p_root		pointer to the tree
-* @param	print_all	0 = ask user for entering a date-range and print only those appointments meeting the range,
-*						NOT 0 = print all appointments.
+* @param	p_root (st_root*)	pointer to the tree
+* @param	remove_all (int)	0 = ask user for entering a date-range and remove only those appointments meeting the range,
+*								NOT 0 = remove all appointments.
+* @param	print_details (int)	0 = don't print function details, NOT 0 = do print function details
+*								This is for in case this function gets called from the import function and to avoid unnecessary prints
 * @return	void
 */
-void remove_appointments_in_range_or_all(st_root* p_root, int remove_all)
+void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int print_details)
 {
 
 	st_date start_date;
@@ -1528,7 +1570,11 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all)
 	//if tree is already empty
 	if (p_year == NULL)
 	{
-		printf("Tree is emtpy! Nothing to delete!\n");
+		if (print_details != 0)
+		{
+			printf("Tree is emtpy! Nothing to delete!\n");
+		}
+		
 		return;
 	}
 
@@ -1735,7 +1781,7 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all)
 
 void remove_appointments_in_range(st_root* p_root)
 {
-	remove_appointments_in_range_or_all(p_root, 0);
+	remove_appointments_in_range_or_all(p_root, 0, 1);
 //	st_date start_date;
 //	st_date end_date;
 //	int dates_valid = 0;
@@ -1936,7 +1982,7 @@ void remove_appointments_in_range(st_root* p_root)
 
 void remove_tree(st_root* p_root, int print_details)
 {
-	remove_appointments_in_range_or_all(p_root, 1);
+	remove_appointments_in_range_or_all(p_root, 1, 1);
 //	st_year* p_year = p_root->pl_year;
 //	
 //	//if tree is already empty
