@@ -128,16 +128,29 @@ enum error_codes
 
 //function prototypes
 void flush_keyboard_input(void);
-int is_date_valid(st_date* p_date);
-int is_end_time_valid_to_start_time(st_time* p_end_time, st_time* p_start_time);
+char* my_strtok(char* str, const char* delimiter);
 int generate_id(void);
+void user_request_date(st_date* p_date, char* p_message);
+int get_max_days_of_month(int year, int month);
+int date_to_int(int year, int month, int day);
+int is_date_valid(st_date* p_date);
+int is_time_valid(st_time* p_time);
+int is_end_time_valid_to_start_time(st_time* p_end_time, st_time* p_start_time);
+st_year* get_or_create_year(st_root* p_this_root, int year);
+st_month* get_or_create_month(st_year* p_this_year, int month);
+st_day* get_or_create_day(st_month* p_this_month, int day);
+st_appointment* get_and_create_appointment(st_day* p_this_day, st_time* p_time_start);
+void add_appointment_to_tree(st_root* p_root, st_appointment* p_new_appointment);
+void print_appointment_details(st_appointment* p_appointment);
+void print_appointments_with_match(st_root* p_root); //TODO:  FIX THIS WEIRD WARNING
+void print_appointments_in_range_or_all(st_root* p_root, int print_all);
 void init_root(st_root* p_root);
 //int write_menu_and_get_option(void);
 //int process_menu_option(st_root* p_root, int choice);
 void print_appointments_in_range(st_root* p_root);
-void print_appointments_with_match(st_root* p_root);
 
 void import_calendar_file(st_root* p_root, char* filename);
 void export_calendar_file(st_root* p_root, char* filename);
+void add_appointment_manually(st_root* p_root);
 void remove_appointments_in_range(st_root* p_root);
 void remove_tree(st_root* p_root, int print_details);

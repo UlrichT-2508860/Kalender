@@ -8,6 +8,11 @@
 
 //#define USE_MALLOCS
 
+/**
+* @brief	This function will flush the input stream.
+* @param	void
+* @return	void
+*/
 void flush_keyboard_input(void)
 {
 	char c;
@@ -19,6 +24,13 @@ void flush_keyboard_input(void)
 
 }
 
+/**
+* @brief	This function will split a string with a given delimiter, it also works
+*			if the token is empty
+* @param	str (char*) the address of a given string
+* @param	delimiter (const char*) a pointer to a constant delimiter
+* @return	char* a pointer to the token
+*/
 char* my_strtok(char* str, const char* delimiter)
 {
 	char* start;
@@ -48,7 +60,11 @@ char* my_strtok(char* str, const char* delimiter)
 
 }
 
-
+/**
+* @brief	This function will generate an ID based on the current time
+* @param	void
+* @return	the id (int) 
+*/
 int generate_id(void)
 {
 	//source: https://www.geeksforgeeks.org/c/time-h-header-file-in-c-with-examples/
@@ -59,7 +75,12 @@ int generate_id(void)
 
 }
 
-
+/**
+* @brief	This function requests the user to input a date and update a given date struct
+* @param	p_date (st_date*) The address to the date struct
+* @param	p_message (char*) A pointer to a string to print if it was given
+* @return	void
+*/
 void user_request_date(st_date* p_date, char* p_message)
 {
 	//print a message (if not NULL) and get the date.
@@ -80,7 +101,12 @@ void user_request_date(st_date* p_date, char* p_message)
 }
 
 
-
+/**
+* @brief	Gets the max amount of days depending on the month (and leap year)
+* @param	year (int) A given year
+* @param	month (int) A given month
+* @return	The max amount of months (int)
+*/
 int get_max_days_of_month(int year, int month)
 {
 	//calculate max days:
@@ -128,7 +154,13 @@ int get_max_days_of_month(int year, int month)
 	return max_days;
 }
 
-
+/**
+* @brief	Converts a given date into the amount of days
+* @param	year (int) A given year
+* @param	month (int) A given month
+* @param	day (int) A given day
+* @return	The number of days (int)
+*/
 int date_to_int(int year, int month, int day)
 {
 	int number_of_days = (year * 365) +		//add default number of days per year
@@ -143,7 +175,11 @@ int date_to_int(int year, int month, int day)
 	return number_of_days;
 }
 
-
+/**
+* @brief	Checks if a given date struct is a valid date
+* @param	p_date (st_date*) The address of a date struct
+* @return	0 if date is valid, -1 if not valid (int)
+*/
 int is_date_valid(st_date* p_date)
 {
 	//check year (only positive numbers)
@@ -215,6 +251,11 @@ int is_date_valid(st_date* p_date)
 	return 0;
 }
 
+/**
+* @brief	Check is a given time stuct is valid
+* @param	p_time (st_time*) The address of a time struct
+* @return	0 if time is valid, -1 if not valid
+*/
 int is_time_valid(st_time* p_time)
 {
 	//check for hours
@@ -236,10 +277,10 @@ int is_time_valid(st_time* p_time)
 }
 
 /**
- * @brief Checks if the end time falls before the start time
- * @param p_end_time pointer to the end time struct
- * @param p_start_time pointer to the start time struct
- * @return 0 if valid, -1 if not valid
+ * @brief	Checks if the end time falls before the start time
+ * @param	p_end_time pointer to the end time struct
+ * @param	p_start_time pointer to the start time struct
+ * @return	0 if valid, -1 if not valid
  */
 int is_end_time_valid_to_start_time(st_time* p_end_time, st_time* p_start_time)
 {
@@ -251,7 +292,13 @@ int is_end_time_valid_to_start_time(st_time* p_end_time, st_time* p_start_time)
 	return -1;
 }
 
-
+/**
+* @brief	This function will search the tree for a given year and returns the address of that struct.
+*			If the year is not present, it will be created.
+* @param	p_this_root (st_root*) The address of the root
+* @param	year (int) The year to be searched
+* @return	Address to new year struct (st_year*)
+*/
 st_year* get_or_create_year(st_root* p_this_root, int year)
 {
 	st_year* tmp_year = p_this_root->pl_year;
@@ -388,7 +435,13 @@ st_year* get_or_create_year(st_root* p_this_root, int year)
 }
 
 
-
+/**
+* @brief	This function will search in a year struct for a given month and returns the address of that struct.
+*			If the month is not present, it will be created.
+* @param	p_this_year (st_year*) The address of the current year struct
+* @param	month (int) The month to be searched
+* @return	Address to new month struct (st_month*)
+*/
 st_month* get_or_create_month(st_year* p_this_year, int month)
 {
 	st_month* tmp_month = p_this_year->pl_month;
@@ -456,7 +509,13 @@ st_month* get_or_create_month(st_year* p_this_year, int month)
 	
 }
 
-
+/**
+* @brief	This function will search in a month struct for a given day and returns the address of that struct.
+*			If the day is not present, it will be created.
+* @param	p_this_month (st_month*) The address of the current month struct
+* @param	day (int) The day to be searched
+* @return	Address to new day struct (st_day*)
+*/
 st_day* get_or_create_day(st_month* p_this_month, int day)
 {
 	st_day* tmp_day = p_this_month->pl_day;
@@ -525,6 +584,12 @@ st_day* get_or_create_day(st_month* p_this_month, int day)
 
 }
 
+/**
+* @brief	This function will create a new appointment struct and sorts it based on the start timeof the appointment
+* @param	p_this_day (st_day*) The address of the current day struct
+* @param	p_time_start (st_time*) The time when the appointment will start
+* @return	Address to new appointment struct (st_appointment*)
+*/
 st_appointment* get_and_create_appointment(st_day* p_this_day, st_time* p_time_start)
 {
 	st_appointment* tmp_appointment = p_this_day->pl_appointment;
@@ -604,7 +669,12 @@ st_appointment* get_and_create_appointment(st_day* p_this_day, st_time* p_time_s
 
 
 
-
+/**
+* @brief	This function will add a new appointment to the calendar tree
+* @param	p_root (st_root*) The address of the root struct
+* @param	p_new_appointment The address of the new appointment struct
+* @return	void
+*/
 void add_appointment_to_tree(st_root* p_root, st_appointment* p_new_appointment)
 {
 	st_year* p_year;
@@ -649,7 +719,11 @@ void add_appointment_to_tree(st_root* p_root, st_appointment* p_new_appointment)
 }
 
 
-
+/**
+* @brief	This function prints every detail of a given detail
+* @prama	p_appointment (st_appointment*) The address of an appointment struct
+* @return	void
+*/
 void print_appointment_details(st_appointment* p_appointment)
 {
 	//printf("Date: %04d/%02d/%02d\n", p_year->year, p_month->month, p_day->day);
@@ -677,7 +751,11 @@ void print_appointment_details(st_appointment* p_appointment)
 
 
 
-
+/**
+* @brief	This function will print all appointments that match with a string the user gives
+* @param	p_root (st_root*) The address of the root struct
+* @return	void
+*/
 void print_appointments_with_match(st_root* p_root)
 {
 	st_year* p_year = p_root->pl_year;
@@ -762,7 +840,7 @@ void print_appointments_with_match(st_root* p_root)
 *						NOT 0 = print all appointments.
 * @return	void
 */
-void print_appointments_in_range_v2(st_root* p_root, int print_all)
+void print_appointments_in_range_or_all(st_root* p_root, int print_all)
 {
 	st_date start_date;
 	st_date end_date;
@@ -877,7 +955,7 @@ void print_appointments_in_range_v2(st_root* p_root, int print_all)
 
 void print_appointments_in_range(st_root* p_root)
 {
-	print_appointments_in_range_v2(p_root, 0);
+	print_appointments_in_range_or_all(p_root, 0);
 	//st_date start_date;
 	//st_date end_date;
 	//int dates_valid=0;
@@ -969,7 +1047,7 @@ void print_appointments_in_range(st_root* p_root)
 
 void print_appointments_from_tree(st_root* p_root)
 {
-	print_appointments_in_range_v2(p_root, 1);
+	print_appointments_in_range_or_all(p_root, 1);
 	//st_year* p_year = p_root->pl_year;
 
 	//if (p_year == NULL)
@@ -1003,7 +1081,14 @@ void print_appointments_from_tree(st_root* p_root)
 
 
 
-
+/**
+* @brief	This function will import a calendar by using a txt file, reading it, and getting every member
+*			of an appointment struct. This function will crash when something invalid was read, it will delete
+*			the root afterwards.
+* @param	p_root (st_root*) The address of the root struct
+* @param	default_filename (char*) The default filename, could be NULL
+* @return	void
+*/
 void import_calendar_file(st_root* p_root, char* default_filename)
 {
 
@@ -1194,6 +1279,13 @@ void import_calendar_file(st_root* p_root, char* default_filename)
 
 	fclose(h_calendar_file);
 }
+
+/**
+* @brief	This function will take the current calendar tree and export it to a file
+* @param	p_root (st_root*) The address of the root struct
+* @param	filename (char*) A pointer to the filename
+* @return	void
+*/
 void export_calendar_file(st_root* p_root, char* filename)
 {
 	FILE* h_calendar_file = fopen(filename, "w");
@@ -1250,8 +1342,9 @@ void export_calendar_file(st_root* p_root, char* filename)
 
 }
 /**
-* @brief Adds an appointment to the calendar
-* 
+* @brief	Adds an appointment to the calendar (by user input)
+* @param	p_root (st_root*) The address of the root struct
+* @return	void
 */
 void add_appointment_manually(st_root* p_root)
 {
@@ -1415,8 +1508,6 @@ void add_appointment_manually(st_root* p_root)
 
 void remove_appointments_in_range(st_root* p_root)
 {
-
-
 	
 	st_date start_date;
 	st_date end_date;
@@ -1714,7 +1805,11 @@ void remove_tree(st_root* p_root, int print_details)
 
 }
 
-//this function will only be called at the beginning
+/**
+* @brief	This function initializes the root struct
+* @param	p_root (st_root*) The address of the root struct
+* @return	void
+*/
 void init_root(st_root* p_root)
 {
 
