@@ -4,9 +4,13 @@
 
 #include "Kalender.h"
 
-//with the help of ANSI escape codes.
+/**
+* @brief	This function should clear the terminal
+* @param	void
+* @return	void
+*/
 void clearscreen(void)
-{
+{	//with the help of ANSI escape codes.
 	//source: https://stackoverflow.com/questions/37774983/clearing-the-screen-by-printing-a-character
 	printf("\033[2J\033[H");
 	//fflush(stdout);
@@ -15,7 +19,7 @@ void clearscreen(void)
 /**
  * @brief   This function prints the main menu. The user also inputs the option.
  * @param   void
- * @return  option
+ * @return  option (int) The returned option the user gave as input
  */
 int write_menu_and_get_option(void)
 {
@@ -33,8 +37,7 @@ int write_menu_and_get_option(void)
 
 	int choice;
 	if (scanf("%d", &choice) != 1)
-	{
-		//scanf went wrong, return illegal value
+	{	//scanf went wrong, return illegal value
 		choice = -1;
 	}
 	//flush all remaining characters for next input
@@ -60,9 +63,10 @@ int write_menu_and_get_option(void)
 }
 
 /**
-* @brief	This function processes the give integer.
-* @param	Choice (int)
-* @return	Processed choice (int)
+* @brief	This function processes the given menu option.
+* @param	p_root (st_root*) The address of the root struct
+* @param	Choice (int) The choice the user gave as input
+* @return	Processed choice (int) The choice input that has been processed  
 */
 int process_menu_option(st_root* p_root, int choice)
 {
