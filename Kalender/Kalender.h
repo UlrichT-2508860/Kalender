@@ -152,5 +152,6 @@ void print_appointments_in_range(st_root* p_root);
 void import_calendar_file(st_root* p_root, char* filename);
 void export_calendar_file(st_root* p_root, char* filename);
 void add_appointment_manually(st_root* p_root);
+void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int print_details);
 void remove_appointments_in_range(st_root* p_root);
 void remove_tree(st_root* p_root, int print_details);
