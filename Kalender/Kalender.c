@@ -3,75 +3,14 @@
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
+#include "utils.h"
 #include "Kalender.h"
 
 
 //#define USE_MALLOCS
 
-/**
-* @brief	This function will flush the input stream.
-* @param	void
-* @return	void
-*/
-void flush_keyboard_input(void)
-{
-	char c;
-	do
-	{
-		c = getchar();
-	//} while (c != '\n');
-	} while ((c != '\n') && (c != EOF));
-
-}
-
-/**
-* @brief	This function will split a string with a given delimiter, it also works
-*			if the token is empty
-* @param	str (char*) the address of a given string
-* @param	delimiter (const char*) a pointer to a constant delimiter
-* @return	char* a pointer to the token
-*/
-char* my_strtok(char* str, const char* delimiter)
-{
-	char* start;
-	static char* end;
-
-	if (str == NULL)
-	{
-		start = end;
-	}
-	else
-	{
-		start = str;
-	}
-	 
-	end = strchr(start, *delimiter);
-	if (end == NULL)
-	{
-		//no more delimters found, check to get rid of last '\n'
-		end = strchr(start, '\n');
-	}
-	*end = '\0';
-	end++;
 
 
-	//increment for next member
-	return start;
-
-}
-
-/**
-* @brief	This function transforms a given string into it's lowercase version. This will be used for the matching string function
-* @param	string (char*) The address of a string
-* @return	void
-*/
-void string_to_lower(char* string)
-{
-	for (int i = 0; i < strlen(string); i++)
-	{
-		string[i] = tolower(string[i]);
-	}
-}
 
 /**
 * @brief	This function will generate an ID based on the current time
@@ -850,6 +789,71 @@ void print_appointments_with_match(st_root* p_root)
 	}
 }
 
+
+
+
+
+
+/**
+* @brief	This function requests two dates from the user that respresent a range. It will also check if the input is correct
+* @param	p_start_date (st_date*) The address of the start date struct
+* @param	p_end_date (st_date*) The address of the end date struct
+* @param	p_start_date_in_days (int*) The address of the start date converted to days number
+* @param	p_start_year_month_in_days (int*) The address of the start date (year and month only) converted to days number
+* @param	p_end_date_in_days (int*) The address of the end date converted to days number
+* @param	p_end_year_month_in_days (int*) The address of the end date (year and month only) converted to days number
+* @return	void
+*/
+void user_request_date_range(	st_date* p_start_date, 
+								st_date* p_end_date,
+								int* p_start_date_in_days,
+								int* p_start_year_month_in_days,
+								int* p_end_date_in_days,
+								int* p_end_year_month_in_days)
+
+
+{
+	int dates_valid = 0;
+
+	//preset structures to 0
+	//memset(p_start_date, 0, sizeof(*p_start_date));
+	//memset(p_end_date, 0, sizeof(*p_end_date));
+
+	//TODO: MAKE THIS A FUNCTION, MIGHT ALSO BE USED FOR DELETE IN RANGE
+	do
+	{
+		//get the start-date
+		user_request_date(p_start_date, "Please give the start-date (YYYY/MM/DD): ");
+		//get the end-date
+		user_request_date(p_end_date, "Please give the end-date (YYYY/MM/DD): ");
+
+		*p_start_date_in_days = date_to_int(p_start_date->year, p_start_date->month, p_start_date->day);
+		*p_end_date_in_days	= date_to_int(p_end_date->year, p_end_date->month, p_end_date->day);
+		//Check if end-date is earlier than start-date.
+		if (*p_end_date_in_days < *p_start_date_in_days)
+		{
+			//dates are NOT OK, repeat while loop until correct dates filled in.
+			printf("END-DATE OCCURS EARLIER THAN START-DATE!\n");
+			printf("Please try again (press enter).");
+			flush_keyboard_input();	//wait for enter and flush garbage input
+		}
+		else
+		{
+			//dates are OK, break off while loop and continue
+			*p_start_year_month_in_days = date_to_int(p_start_date->year, p_start_date->month, 0);
+			*p_end_year_month_in_days = date_to_int(p_end_date->year, p_end_date->month, 0);
+			dates_valid = 1;
+		}
+	} while (dates_valid == 0);
+
+	return;
+}
+
+
+
+
+
+
 /**
 * @brief	This function prints all appointments (from the tree) or all the appointments in a given range.
 * @param	p_root		pointer to the tree 
@@ -878,7 +882,14 @@ void print_appointments_in_range_or_all(st_root* p_root, int print_all)
 	memset(&end_date, 0, sizeof(end_date));
 
 	if (print_all == 0)
-	{
+	{	//if not print all, ask for date range
+		 user_request_date_range(	&start_date,
+									&end_date,
+									&start_date_in_days,
+									&start_year_month_in_days,
+									&end_date_in_days,
+									&end_year_month_in_days);
+#if 0
 		//TODO: MAKE THIS A FUNCTION, MIGHT ALSO BE USED FOR DELETE IN RANGE
 		do
 		{
@@ -905,6 +916,7 @@ void print_appointments_in_range_or_all(st_root* p_root, int print_all)
 				dates_valid = 1;
 			}
 		} while (dates_valid == 0);
+#endif
 	}
 
 	//if print_all == 0 -> only print the appointments whose date are in range
@@ -1572,7 +1584,7 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 	{
 		if (print_details != 0)
 		{
-			printf("Tree is emtpy! Nothing to delete!\n");
+			printf("Calendar is empty! Nothing to delete!\n");
 		}
 		
 		return;
@@ -1583,7 +1595,15 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 	memset(&end_date, 0, sizeof(end_date));
 
 	if (remove_all == 0)
-	{
+	{	//if not remove all, ask for date range
+		user_request_date_range(&start_date,
+								&end_date,
+								&start_date_in_days,
+								&start_year_month_in_days,
+								&end_date_in_days,
+								&end_year_month_in_days);
+		
+#if 0
 		do
 		{
 			//get the start-date
@@ -1629,6 +1649,7 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 				dates_valid = 1;
 			}
 		} while (dates_valid == 0);
+#endif
 	}
 
 	//if remove_all == 0 -> only remove the appointments whose date are in range
@@ -1735,7 +1756,6 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 
 					}
 
-
 				}
 
 				else
@@ -1776,6 +1796,10 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 	else if (remove_all == 0)
 	{
 		printf("%d appointments deleted!\n", found);
+	}
+	else
+	{
+		printf("Calendar completely removed!\n");
 	}
 }
 
@@ -2069,10 +2093,10 @@ void remove_tree(st_root* p_root, int print_details)
 	//root points to NULL (init root)
 	init_root(p_root);
 
-	if (print_details != 0)
+	/*if (print_details != 0)
 	{
 		printf("Calendar completely removed!\n");
-	}
+	}*/
 	
 	/*p_root->pl_year = NULL;*/
 

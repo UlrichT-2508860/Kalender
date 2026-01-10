@@ -1,5 +1,6 @@
 #pragma once
-
+#ifndef KALENDER_H
+#define KALENDER_H
 
 
 //define constants
@@ -127,8 +128,7 @@ enum error_codes
 };
 
 //function prototypes
-void flush_keyboard_input(void);
-char* my_strtok(char* str, const char* delimiter);
+
 int generate_id(void);
 void user_request_date(st_date* p_date, char* p_message);
 int get_max_days_of_month(int year, int month);
@@ -155,3 +155,5 @@ void add_appointment_manually(st_root* p_root);
 void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int print_details);
 void remove_appointments_in_range(st_root* p_root);
 void remove_tree(st_root* p_root, int print_details);
+
+#endif
