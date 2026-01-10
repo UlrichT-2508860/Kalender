@@ -89,31 +89,23 @@ int process_menu_option(st_root* p_root, int choice)
 		return 0;
 
 	case CREATE_APPOINTMENT:
-
 		add_appointment_manually(p_root);
 		break;
 
 	case REMOVE_APPOINTMENT_RANGE:
-
-		remove_appointments_in_range(p_root);
-
+		remove_appointments_in_range_or_all(p_root, 0, 1);
 		break;
 
 	case EMPTY_CALENDAR:
-
-		remove_tree(p_root, 1);
-		
+		remove_appointments_in_range_or_all(p_root, 1, 1);
 		break;
 
 	case DISPLAY_CALENDAR:
-
-		print_appointments_from_tree(p_root);
-
+		print_appointments_in_range_or_all(p_root, 1);
 		break;
 
 	case DISPLAY_CALENDAR_RANGE:
-
-		print_appointments_in_range(p_root);
+		print_appointments_in_range_or_all(p_root, 0);
 		break;
 
 	case WRITE_CALENDAR_MATCH:
