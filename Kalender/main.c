@@ -142,7 +142,7 @@ int main(void)
 	printf("Welcome back user!\n");
 	int processed_choice;
 
-	//char* my_string = malloc(1000);
+	//char* my_string = malloc_s(100000000000);
 	//strcpy(my_string, "kiss my ass!");
 
 	st_root root;

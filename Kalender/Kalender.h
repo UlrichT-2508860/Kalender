@@ -13,7 +13,6 @@
 
 #define FILE_DELIMITER ";"
 
-#define USE_MALLOCS	//to use mem-allocated string messages in the appointment
 
 //initialize the structs
 
@@ -71,19 +70,10 @@ typedef struct st_appointment
 	st_date date;
 	st_time time_start;
 	st_time time_end;
-
-	
-#ifdef USE_MALLOCS
 	char *p_title;
 	char *p_description;
 	char *p_location_description;
-
-#else
-	char title[MAX_TITLE_LENGTH];
-	char description[MAX_DESCRIPTION_LENGTH];
-	char location_description[MAX_LOCATION_LENGTH];
-#endif
-	struct st_appointment* pl_next_appointment;
+	struct st_appointment* pl_next_appointment;	//Our linked list pointer!
 } st_appointment;
 
 //initialize enums
@@ -157,8 +147,6 @@ void user_request_date_range(	st_date* p_start_date,
 
 
 void print_appointments_in_range_or_all(st_root* p_root, int print_all);
-//int write_menu_and_get_option(void);
-//int process_menu_option(st_root* p_root, int choice);
 
 void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int print_details);
 void import_calendar_file(st_root* p_root, char* filename);

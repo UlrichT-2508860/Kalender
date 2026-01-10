@@ -7,6 +7,22 @@
 
 
 
+/**
+* @brief	A safe version of malloc. It will exit the program when an allocation error has occurred.
+* @param	size (size_t) The size of space you want to preserve for the allocation process.
+* @return	p_malloc_location (void*) The address of where the preserved memory is located.
+*/
+void* malloc_s(size_t size)
+{
+	void* p_malloc_location = malloc(size);
+	if (p_malloc_location == NULL)
+	{
+		printf("Malloc allocation error has occurred!\nAborting program...");
+		exit(EXIT_FAILURE);
+	}
+
+	return p_malloc_location;
+}
 
 /**
 * @brief	This function will flush the input stream.
@@ -72,6 +88,7 @@ void string_to_lower(char* string)
 		string[i] = tolower(string[i]);
 	}
 }
+
 
 
 
