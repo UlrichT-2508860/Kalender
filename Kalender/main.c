@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include "utils.h"
 #include "Kalender.h"
+
 
 /**
 * @brief	This function should clear the terminal
