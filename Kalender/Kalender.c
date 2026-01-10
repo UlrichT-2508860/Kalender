@@ -7,7 +7,6 @@
 #include "Kalender.h"
 
 
-//#define USE_MALLOCS
 
 
 
@@ -54,23 +53,11 @@ int get_max_days_of_month(int year, int month)
 			}
 			break;
 		case JAN:
-			max_days = 31;
-			break;
 		case MAR:
-			max_days = 31;
-			break;
 		case MAY:
-			max_days = 31;
-			break;
 		case JUL:
-			max_days = 31;
-			break;
 		case AUG:
-			max_days = 31;
-			break;
 		case OCT:
-			max_days = 31;
-			break;
 		case DEC:
 			max_days = 31;
 			break;
@@ -208,7 +195,7 @@ st_year* get_or_create_year(st_root* p_this_root, int year)
 	//if nothing is present in the root, create the first year struct and return directly
 	if (tmp_year == NULL)
 	{
-		tmp_year = malloc(sizeof(st_month));
+		tmp_year = malloc_s(sizeof(st_month));
 		tmp_year->year = year;
 		tmp_year->pl_next_year = NULL;
 		tmp_year->pl_month = NULL;
@@ -232,7 +219,7 @@ st_year* get_or_create_year(st_root* p_this_root, int year)
 	if (tmp_year->year != year)
 	{
 		//year is not found create new year struct in memory:
-		tmp_new_year = malloc(sizeof(st_year));
+		tmp_new_year = malloc_s(sizeof(st_year));
 		tmp_new_year->year = year;
 		tmp_new_year->pl_month = NULL;
 
@@ -286,7 +273,7 @@ st_month* get_or_create_month(st_year* p_this_year, int month)
 	//if nothing is present for this year, create the first month struct and return directly
 	if (tmp_month == NULL)
 	{
-		tmp_month = malloc(sizeof(st_month));
+		tmp_month = malloc_s(sizeof(st_month));
 		tmp_month->month = month;
 		tmp_month->pl_next_month = NULL;
 		tmp_month->pl_day= NULL;
@@ -309,7 +296,7 @@ st_month* get_or_create_month(st_year* p_this_year, int month)
 	if (tmp_month->month != month)
 	{
 		//month is not found, create a new month struct in memory
-		tmp_new_month = malloc(sizeof(st_month));
+		tmp_new_month = malloc_s(sizeof(st_month));
 		tmp_new_month->month = month;
 		tmp_new_month->pl_day = NULL;
 
@@ -360,7 +347,7 @@ st_day* get_or_create_day(st_month* p_this_month, int day)
 	//if nothing is present for this month, create the first day struct and return directly
 	if (tmp_day == NULL)
 	{
-		tmp_day = malloc(sizeof(st_day));
+		tmp_day = malloc_s(sizeof(st_day));
 		tmp_day->day = day;
 		tmp_day->pl_next_day = NULL;
 		tmp_day->pl_appointment = NULL;
@@ -383,7 +370,7 @@ st_day* get_or_create_day(st_month* p_this_month, int day)
 	if (tmp_day->day != day)
 	{
 		//day is not found, create a new day struct in memory
-		tmp_new_day = malloc(sizeof(st_day));
+		tmp_new_day = malloc_s(sizeof(st_day));
 		tmp_new_day->day = day;
 		tmp_new_day->pl_appointment = NULL;
 
@@ -436,7 +423,7 @@ st_appointment* get_and_create_appointment(st_day* p_this_day, st_time* p_time_s
 	//if nothing is present on this day, create the first appointment struct with the given time
 	if (tmp_appointment == NULL)
 	{
-		tmp_appointment = malloc(sizeof(st_appointment));
+		tmp_appointment = malloc_s(sizeof(st_appointment));
 		tmp_appointment->time_start.hour = p_time_start->hour;
 		tmp_appointment->time_start.minute = p_time_start->minute;
 		tmp_appointment->pl_next_appointment = NULL;
@@ -458,7 +445,7 @@ st_appointment* get_and_create_appointment(st_day* p_this_day, st_time* p_time_s
 	int tmp_appointment_time_start_in_minutes = tmp_appointment->time_start.hour * 60 + tmp_appointment->time_start.minute;
 
 	//appointment hour has not been found, create a new appointment struct in memory
-	tmp_new_appointment = malloc(sizeof(st_appointment));
+	tmp_new_appointment = malloc_s(sizeof(st_appointment));
 	tmp_new_appointment->time_start.hour = p_time_start->hour;
 	tmp_new_appointment->time_start.minute = p_time_start->minute;
 
@@ -519,27 +506,11 @@ void add_appointment_to_tree(st_root* p_root, st_appointment* p_new_appointment)
 	//HINT: TWO APPOINTMENTS AT THE SAME TIME ARE ALLOWED. new appointment will be placed behind the already existing appointment
 	p_appointment = get_and_create_appointment(p_day, &p_new_appointment->time_start);
 
-	//Fill in all the data of the appointment.
-	//tip: the code below can also be done as follows:
-	//struct st_appointment* pl_next_appointment_backup = p_appointment->pl_next_appointment;
-	//memcpy(&p_appointment, &p_new_appointment, sizeof(st_appointment));
-	//p_appointment->pl_next_appointment = pl_next_appointment_backup;
-#ifdef USE_MALLOCS
+	//Fill in all the data of the appointment (but keep the link to the next appointment!).
 	//copy the entire appointment data to its new destination struct in the tree.
 	st_appointment* pl_backup_next_appointment = p_appointment->pl_next_appointment;
 	memcpy(p_appointment, p_new_appointment, sizeof(st_appointment));
 	p_appointment->pl_next_appointment = pl_backup_next_appointment;
-#else
-	p_appointment->id = p_new_appointment->id;
-	memcpy(&p_appointment->date, &p_new_appointment->date, sizeof(st_date));
-	memcpy(&p_appointment->time_start, &p_new_appointment->time_start, sizeof(st_time));
-	memcpy(&p_appointment->time_end, &p_new_appointment->time_end, sizeof(st_time));
-	strcpy(&p_appointment->title, &p_new_appointment->title);
-	strcpy(&p_appointment->description, &p_new_appointment->description);
-	strcpy(&p_appointment->location_description, &p_new_appointment->location_description);
-#endif
-
-
 }
 
 
@@ -554,17 +525,10 @@ void print_appointment_details(st_appointment* p_appointment)
 	{
 		printf("\n APPOINTMENT: %d\n\n", p_appointment->id);
 		//printf("\n");
-#ifdef USE_MALLOCS
 		printf("  Title: %s\n\n", p_appointment->p_title);
 		//printf("\n");
 		printf("   Description: %s\n", p_appointment->p_description);
 		printf("   Location: %s\n", p_appointment->p_location_description);
-#else
-		printf("  Title: %s\n\n", p_appointment->title);
-		//printf("\n");
-		printf("   Description: %s\n", p_appointment->description);
-		printf("   Location: %s\n", p_appointment->location_description);
-#endif
 		//printf("  Date: %04d/%02d/%02d\n", p_appointment->date.year, p_appointment->date.month, p_appointment->date.day);
 		printf("   Start-time: %02d:%02d\n", p_appointment->time_start.hour, p_appointment->time_start.minute);
 		printf("   End-time: %02d:%02d\n\n", p_appointment->time_end.hour, p_appointment->time_end.minute);
@@ -629,18 +593,12 @@ void print_appointments_with_match(st_root* p_root)
 				while (p_appointment != NULL)
 				{
 					//if match string is present, display appointment
-#ifdef USE_MALLOCS
-					//TODO: MAKE THIS CASE INSENSITIVE
 					char lowered_title[MAX_TITLE_LENGTH];
 					strcpy(lowered_title, p_appointment->p_title);
 					string_to_lower(lowered_title);
 					if (strstr(lowered_title, match_string))
 					//if (strstr(p_appointment->p_title, match_string))
 					{
-#else
-					if (strstr(tolower(p_appointment->title), tolower(match_string)))
-					{
-#endif
 						printf("Date: %04d/%02d/%02d\n", p_year->year, p_month->month, p_day->day);
 						print_appointment_details(p_appointment);
 						found = 1;
@@ -975,14 +933,9 @@ void import_calendar_file(st_root* p_root, char* default_filename)
 			import_error = IMPORT_ERROR_TITLE; //Mark as error
 			break;
 		}
-#ifdef USE_MALLOCS
-		tmp_appointment.p_title = malloc(strlen(p_member) + 1); // malloc size of string + 1 for nullbyte
+		tmp_appointment.p_title = malloc_s(strlen(p_member) + 1); // malloc size of string + 1 for nullbyte
 		//TODO CHECK IF MALLOC FAILED (NULL)
 		strcpy(tmp_appointment.p_title, p_member);
-#else
-		strcpy(tmp_appointment.title, p_member);
-		
-#endif
 
 		//get description (second member)
 		p_member = my_strtok(NULL, FILE_DELIMITER);
@@ -991,13 +944,9 @@ void import_calendar_file(st_root* p_root, char* default_filename)
 			import_error = IMPORT_ERROR_DESCRIPTION;
 			break;
 		}
-#ifdef USE_MALLOCS
-		tmp_appointment.p_description = malloc(strlen(p_member) + 1); // malloc size of string + 1 for nullbyte
+		tmp_appointment.p_description = malloc_s(strlen(p_member) + 1); // malloc size of string + 1 for nullbyte
 		//TODO CHECK IF MALLOC FAILED (NULL)
 		strcpy(tmp_appointment.p_description, p_member);
-#else
-		strcpy(tmp_appointment.description, p_member);
-#endif
 
 		//get location (third member)
 		p_member = my_strtok(NULL, FILE_DELIMITER);
@@ -1006,13 +955,9 @@ void import_calendar_file(st_root* p_root, char* default_filename)
 			import_error = IMPORT_ERROR_LOCATION;
 			break;
 		}
-#ifdef USE_MALLOCS
-		tmp_appointment.p_location_description = malloc(strlen(p_member) + 1); // malloc size of string + 1 for nullbyte
+		tmp_appointment.p_location_description = malloc_s(strlen(p_member) + 1); // malloc size of string + 1 for nullbyte
 		//TODO CHECK IF MALLOC FAILED (NULL)
 		strcpy(tmp_appointment.p_location_description, p_member);
-#else
-		strcpy(tmp_appointment.location_description, p_member);
-#endif
 
 		//get date (fourth member)
 		p_member = my_strtok(NULL, FILE_DELIMITER);
@@ -1154,25 +1099,11 @@ void export_calendar_file(st_root* p_root, char* default_filename)
 				st_appointment* p_appointment = p_day->pl_appointment;
 				while (p_appointment != NULL)
 				{
-#ifdef USE_MALLOCS
 					fprintf(h_calendar_file, "%s;%s;%s;%04d/%02d/%02d;%02d:%02d;%02d:%02d\n", p_appointment->p_title, p_appointment->p_description,
 						p_appointment->p_location_description, p_appointment->date.year, p_appointment->date.month,
 						p_appointment->date.day, p_appointment->time_start.hour, p_appointment->time_start.minute,
 						p_appointment->time_end.hour, p_appointment->time_end.minute);
-#else
-					fprintf(h_calendar_file, "%s;%s;%s;%04d/%02d/%02d;%02d:%02d;%02d:%02d\n", p_appointment->title, p_appointment->description,
-							p_appointment->location_description, p_appointment->date.year, p_appointment->date.month,
-							p_appointment->date.day, p_appointment->time_start.hour, p_appointment->time_start.minute,
-							p_appointment->time_end.hour, p_appointment->time_end.minute);
-#endif
 					p_appointment = p_appointment->pl_next_appointment;
-					//printf(" Title: %s\n", p_appointment->title);
-					//printf("  Description: %s\n", p_appointment->description);
-					//printf("  Location: %s\n", p_appointment->location_description);
-					////printf("  Date: %04d/%02d/%02d\n", p_appointment->date.year, p_appointment->date.month, p_appointment->date.day);
-					//printf("  Start-time: %02d:%02d\n", p_appointment->time_start.hour, p_appointment->time_start.minute);
-					//printf("  End-time: %02d:%02d\n", p_appointment->time_end.hour, p_appointment->time_end.minute);
-					//p_appointment = p_appointment->pl_next_appointment;
 
 				}
 				p_day = p_day->pl_next_day;
@@ -1194,18 +1125,14 @@ void add_appointment_manually(st_root* p_root)
 {
 	
 	st_appointment new_appointment;
-	//new_appointment.pl_next_appointment = NULL; // because memcpy
-	//st_date date;
-#ifdef USE_MALLOCS
 
 	char title[MAX_TITLE_LENGTH + 1]; //one extra byte for receiving the \n of the fgets
 	char description[MAX_DESCRIPTION_LENGTH + 1];
 	char location_description[MAX_LOCATION_LENGTH + 1];
-#endif
+
 	//get title of appointment
 	printf("Give the title of your appointment: ");
 
-#ifdef USE_MALLOCS
 	fgets(title, sizeof(title), stdin);
 
 	while ((strlen(title) - 1 == 0) ||
@@ -1222,29 +1149,12 @@ void add_appointment_manually(st_root* p_root)
 	//remove '\n'
 	title[strlen(title) - 1] = '\0';
 
-	new_appointment.p_title = malloc(strlen(title) + 1); // malloc + 1 for nullbyte
+	new_appointment.p_title = malloc_s(strlen(title) + 1); // malloc + 1 for nullbyte
 	strcpy(new_appointment.p_title, title);
-#else
-	//TODO: why is this needed twice???answer= beware previous scanf!! it still contains the newline in its stdin-buffer
-	fgets(&new_appointment.title, sizeof(new_appointment.title), stdin);
 
-	//when invalid input (aka empty), try again
-	while (new_appointment.title[0] == '\n')
-	{
-		printf("You gave an empty input! Please try again: ");
-		fgets(&new_appointment.title, sizeof(new_appointment.title), stdin);
-	}
-
-	//remove '\n'
-	new_appointment.title[strlen(new_appointment.title) - 1] = '\0';
-	//new_appointment.title[strcspn(new_appointment.title, "\n")] = '\0';
-
-	
-#endif
 	//get optional description
 	printf("Give an optional description of your appointment: ");
 
-#ifdef USE_MALLOCS
 	fgets(description, sizeof(description), stdin);
 
 	while (strlen(description) - 1 > MAX_DESCRIPTION_LENGTH)
@@ -1255,19 +1165,12 @@ void add_appointment_manually(st_root* p_root)
 	//remove '\n'
 	description[strlen(description) - 1] = '\0';
 
-	new_appointment.p_description = malloc(strlen(description) + 1); // malloc + 1 for nullbyte
+	new_appointment.p_description = malloc_s(strlen(description) + 1); // malloc + 1 for nullbyte
 	strcpy(new_appointment.p_description, description);
-#else
-	fgets(&new_appointment.description, sizeof(new_appointment.description), stdin);
-	
-	new_appointment.description[strlen(new_appointment.description) - 1] = '\0';
-	//new_appointment.description[strcspn(new_appointment.description, "\n")] = '\0';
-#endif
 
 	//get optional location description
 	printf("Give an optional location description of your appointment: ");
 
-#ifdef USE_MALLOCS
 	fgets(location_description, sizeof(location_description), stdin);
 
 	while (strlen(location_description) - 1 > MAX_LOCATION_LENGTH)
@@ -1278,14 +1181,9 @@ void add_appointment_manually(st_root* p_root)
 	//remove '\n'
 	location_description[strlen(location_description) - 1] = '\0';
 
-	new_appointment.p_location_description = malloc(strlen(location_description) + 1); // malloc + 1 for nullbyte
+	new_appointment.p_location_description = malloc_s(strlen(location_description) + 1); // malloc + 1 for nullbyte
 	strcpy(new_appointment.p_location_description, location_description);
-#else
-	fgets(&new_appointment.location_description, sizeof(new_appointment.location_description), stdin);
-	
-	new_appointment.location_description[strlen(new_appointment.location_description) - 1] = '\0';
-	//new_appointment.location_description[strcspn(new_appointment.location_description, "\n")] = '\0';
-#endif
+
 	//get date
 	user_request_date(&new_appointment.date, "Give the date of your appointment. (Format: YYYY/MM/DD) : ");
 
@@ -1400,13 +1298,12 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 
 								//if there is an appointment found, delete it and goto next
 								st_appointment* backup_pl_next_appointment = p_appointment->pl_next_appointment;
-#ifdef USE_MALLOCS
+		
 								//before we free the allocated appointment, free first the allocated strings
 								// TODO MAKE THIS A FUNCTION									
 								free(p_appointment->p_title);
 								free(p_appointment->p_description);
 								free(p_appointment->p_location_description);
-#endif
 								free(p_appointment);
 								p_appointment = backup_pl_next_appointment;
 
