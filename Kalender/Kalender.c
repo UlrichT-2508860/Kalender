@@ -27,31 +27,6 @@ int generate_id(void)
 
 }
 
-/**
-* @brief	This function requests the user to input a date and update a given date struct
-* @param	p_date (st_date*) The address to the date struct
-* @param	p_message (char*) A pointer to a string to print if it was given
-* @return	void
-*/
-void user_request_date(st_date* p_date, char* p_message)
-{
-	//print a message (if not NULL) and get the date.
-	if (p_message != NULL)
-	{
-		printf(p_message);
-	}
-	scanf("%d/%d/%d", &p_date->year, &p_date->month, &p_date->day);
-	flush_keyboard_input();	//flush input
-
-	//check for invalid input
-	while (is_date_valid(p_date) != 0)
-	{
-		printf("INVALID DATE! TRY AGAIN AND USE THE GIVEN FORMAT: (YYYY/MM/DD): ");
-		scanf("%d/%d/%d", &p_date->year, &p_date->month, &p_date->day);
-		flush_keyboard_input();	//flush garbage input
-	}
-}
-
 
 /**
 * @brief	Gets the max amount of days depending on the month (and leap year)
@@ -139,7 +114,6 @@ int is_date_valid(st_date* p_date)
 	{
 		return -1;
 	}
-		
 
 	//check month (1..12)
 	if ((p_date->month < 1) ||
@@ -147,51 +121,9 @@ int is_date_valid(st_date* p_date)
 	{
 		return -1;
 	}
-		
 
 	//calculate max days:
 	unsigned int max_days = get_max_days_of_month(p_date->year, p_date->month);
-	//switch (p_date->month)
-	//{
-	//case FEB:
-	//	
-	//	//check for leap year
-	//	if ((p_date->year % 400 == 0) ||
-	//		((p_date->year % 4 == 0) && (p_date->year % 100 != 0)))
-	//	{
-	//		max_days = 29;
-	//	}
-	//	else
-	//	{
-	//		max_days = 28;
-	//	}
-	//	break;
-	//case JAN:
-	//	max_days = 31;
-	//	break;
-	//case MAR:
-	//	max_days = 31;
-	//	break;
-	//case MAY:
-	//	max_days = 31;
-	//	break;
-	//case JUL:
-	//	max_days = 31;
-	//	break;
-	//case AUG:
-	//	max_days = 31;
-	//	break;
-	//case OCT:
-	//	max_days = 31;
-	//	break;
-	//case DEC:
-	//	max_days = 31;
-	//	break;
-	//default:
-	//	max_days = 30;
-	//	break;
-	//}
-
 	//check day
 	if ((p_date->day < 1) ||
 		(p_date->day > max_days))
@@ -218,7 +150,7 @@ int is_time_valid(st_time* p_time)
 	}
 
 	//check for minutes
-	if ((p_time->hour < 0) ||
+	if ((p_time->minute < 0) ||
 		(p_time->minute > 59))
 	{
 		return -1;
@@ -243,6 +175,22 @@ int is_end_time_valid_to_start_time(st_time* p_end_time, st_time* p_start_time)
 	}
 	return -1;
 }
+
+
+
+/**
+* @brief	This function initializes the root struct
+* @param	p_root (st_root*) The address of the root struct
+* @return	void
+*/
+void init_root(st_root* p_root)
+{
+
+	p_root->pl_year = NULL;
+
+}
+
+
 
 /**
 * @brief	This function will search the tree for a given year and returns the address of that struct.
@@ -278,45 +226,6 @@ st_year* get_or_create_year(st_root* p_this_root, int year)
 		tmp_year = tmp_year->pl_next_year;
 	}
 
-	// address	|  year		|	pl_next_year
-	//----------+-----------+----------------
-	//	1		|	1970	|	0x012345
-	//	0x012345|	1980	|	NULL
-	//			|			|				
-
-	// case: 1971 is wanted:
-	// we exit the while loop with:
-	// address	|  year		|	pl_next_year
-	//----------+-----------+----------------
-	//	1		|	1970	|	0x012345		<- previous_tmp_year
-	//	0x012345|	1980	|	NULL			<- tmp_year
-	//
-	//		after the insertion
-	// address	|  year		|	pl_next_year
-	//----------+-----------+----------------
-	//	1		|	1970	|	0xEEEAAA
-	//	0xEEEAAA|	1971	|	0x012345		<- tmp_new_year
-	//	0x012345|	1980	|	NULL
-	//
-	//
-	// case2: 1984 is wanted:
-	// we exit the while loop with:
-	// address	|  year		|	pl_next_year
-	//----------+-----------+----------------
-	//	1		|	1970	|	0x012345		<- previous_tmp_year
-	//	0x012345|	1980	|	NULL			<- tmp_year
-	//
-	//		after the insertion
-	// address	|  year		|	pl_next_year
-	//----------+-----------+----------------
-	//	1		|	1970	|	0x012345		<- previous_tmp_year
-	//	0x012345|	1980	|	NULL			<- tmp_year
-	//	1		|	1970	|	0xEEEAAA
-	//	0xEEEAAA|	1971	|	0x012345		<- tmp_new_year
-	//	0x012345|	1980	|	NULL
-	//
-	//
-
 
 
 	//If we come here, either the year is found or we are at the end of the linked list
@@ -349,32 +258,6 @@ st_year* get_or_create_year(st_root* p_this_root, int year)
 				previous_tmp_year->pl_next_year = tmp_new_year;
 			}
 		}
-
-
-
-
-#if 0
-
-		if (tmp_year->pl_next_year == NULL)
-		{
-			// 1) Are we at the of the list -> add new entry
-			tmp_new_year->pl_next_year = NULL;
-		}
-		else
-		{
-			// 2) Are we not at the of the list -> insert new entry (rewiring).
-			tmp_new_year->pl_next_year = tmp_year;
-			previous_tmp_year->pl_next_year = tmp_new_year;
-		}
-
-
-
-		tmp_year->pl_next_year = malloc(sizeof(st_year));
-		tmp_year->pl_next_year->year = year;
-
-		if (tmp_year->pl_next_year != NULL)
-		tmp_year->pl_next_year->pl_next_year = previous_tmp_year->pl_next_year;
-#endif
 
 	}
 	else
@@ -537,7 +420,8 @@ st_day* get_or_create_day(st_month* p_this_month, int day)
 }
 
 /**
-* @brief	This function will create a new appointment struct and sorts it based on the start timeof the appointment
+* @brief	This function will create dynamically a new appointment struct in a given days linked-list and sorts it based on the start time of the appointment.
+*			The appointment will update the linked list 
 * @param	p_this_day (st_day*) The address of the current day struct
 * @param	p_time_start (st_time*) The time when the appointment will start
 * @return	Address to new appointment struct (st_appointment*)
@@ -573,50 +457,38 @@ st_appointment* get_and_create_appointment(st_day* p_this_day, st_time* p_time_s
 	//here previous_appointment is the last appointment that occurs before the start-time OR it is NULL.
 	int tmp_appointment_time_start_in_minutes = tmp_appointment->time_start.hour * 60 + tmp_appointment->time_start.minute;
 
-	////check if match has been found
-	//if (tmp_appointment_time_start_in_minutes != time_start_in_minutes)
-	{
-		//appointment hour has not been found, create a new appointment struct in memory
-		tmp_new_appointment = malloc(sizeof(st_appointment));
-		tmp_new_appointment->time_start.hour = p_time_start->hour;
-		tmp_new_appointment->time_start.minute = p_time_start->minute;
+	//appointment hour has not been found, create a new appointment struct in memory
+	tmp_new_appointment = malloc(sizeof(st_appointment));
+	tmp_new_appointment->time_start.hour = p_time_start->hour;
+	tmp_new_appointment->time_start.minute = p_time_start->minute;
 
-		// define where the appointment needs to be inserted.
-		if ((previous_appointment == NULL) &&									//Are we at the first appointment AND...
-			(tmp_appointment_time_start_in_minutes > time_start_in_minutes))	//...is our new start-time before this first appointment?
-		{	//the appointment needs to be inserted in the beginning
-			tmp_new_appointment->pl_next_appointment = tmp_appointment;
-			p_this_day->pl_appointment = tmp_new_appointment;
+	// define where the appointment needs to be inserted.
+	if ((previous_appointment == NULL) &&									//Are we at the first appointment AND...
+		(tmp_appointment_time_start_in_minutes > time_start_in_minutes))	//...is our new start-time before this first appointment?
+	{	//the appointment needs to be inserted in the beginning
+		tmp_new_appointment->pl_next_appointment = tmp_appointment;
+		p_this_day->pl_appointment = tmp_new_appointment;
+	}
+	else
+	{
+		//if (tmp_appointment_time_start_in_minutes == time_start_in_minutes)
+		//{
+		//	__nop();
+		//}
+
+		if (tmp_appointment_time_start_in_minutes <= time_start_in_minutes)
+		{	//the appointment needs to be added in the back
+			tmp_new_appointment->pl_next_appointment = NULL;
+			//tmp_new_appointment->pl_next_appointment = tmp_appointment->pl_next_appointment;
+			tmp_appointment->pl_next_appointment = tmp_new_appointment;
 		}
 		else
-		{
-			if (tmp_appointment_time_start_in_minutes == time_start_in_minutes)
-			{
-				__nop();
-			}
-
-			if (tmp_appointment_time_start_in_minutes <= time_start_in_minutes)
-			{	//the appointment needs to be added in the back
-				tmp_new_appointment->pl_next_appointment = NULL;
-				//tmp_new_appointment->pl_next_appointment = tmp_appointment->pl_next_appointment;
-				tmp_appointment->pl_next_appointment = tmp_new_appointment;
-			}
-			else
-			{	//the appointment needs to be inserted
-				tmp_new_appointment->pl_next_appointment = tmp_appointment;
-				previous_appointment->pl_next_appointment = tmp_new_appointment;
-			}
+		{	//the appointment needs to be inserted
+			tmp_new_appointment->pl_next_appointment = tmp_appointment;
+			previous_appointment->pl_next_appointment = tmp_new_appointment;
 		}
-		return tmp_new_appointment;
-
 	}
-	//else {
-	//	//TODO: this is incomplete!!
-	//}
-
-	
-	//return p_this_day->pl_appointment;
-
+	return tmp_new_appointment;
 }
 
 
@@ -790,7 +662,97 @@ void print_appointments_with_match(st_root* p_root)
 }
 
 
+/**
+* @brief	This function requests the user to input a time and update a given time struct
+* @param	p_time (st_time*) The address to the time struct
+* @param	p_message (char*) A pointer to a string to print if it was given
+* @return	void
+*/
+void user_request_time(st_time* p_time, char* p_message)
+{
+	//print a message (if not NULL) and get the time.
+	if (p_message != NULL)
+	{
+		printf(p_message);
+	}
+	scanf("%d:%d", &p_time->hour, &p_time->minute);
+	flush_keyboard_input();	//flush garbage input
 
+	//check for invalid input
+	while (is_time_valid(p_time) != 0)
+	{
+		printf("INVALID TIME. USE THE GIVEN FORMAT (HH:MM): ");
+		scanf("%d:%d", &p_time->hour, &p_time->minute);
+		flush_keyboard_input();	//flush garbage input
+	}
+}
+
+
+/**
+* @brief	This function requests two times from the user that respresent a range. It will also check if the input is correct and consistent
+* @param	p_start_time (st_date*) The address of the start time struct
+* @param	p_end_time (st_date*) The address of the end time struct
+* @return	void
+*
+* @note		- errors if the entered time is in an incorrect format (HH/MM). The user needs to retry the entry.
+*			- errors if the end-time is on or before the start-time. The user needs to retry the entry of both times.
+*/
+void user_request_time_range(st_date* p_start_time,	st_date* p_end_time)
+{
+	int times_valid = 0;
+	do
+	{
+		//get the start-time
+		user_request_time(p_start_time, "Give the specific time when your appointment starts (HH:MM) : ");
+		//get the end-time
+		user_request_time(p_end_time, "Give the specific time when your appointment ends (HH:MM) : ");
+
+		//Check if end-time is earlier than start-time.
+		if (is_end_time_valid_to_start_time(p_end_time, p_start_time) != 0)
+		{
+			//times are NOT OK, repeat while loop until correct times filled in.
+			printf("END-time OCCURS EARLIER THAN START-time!\n");
+			printf("Please try again (press enter).");
+			flush_keyboard_input();	//wait for enter and flush garbage input
+		}
+		else
+		{
+			//times are OK, break off while loop and continue
+			times_valid = 1;
+		}
+	} while (times_valid == 0);
+
+	return;
+}
+
+
+
+
+
+/**
+* @brief	This function requests the user to input a date and update a given date struct
+* @param	p_date (st_date*) The address to the date struct
+* @param	p_message (char*) A pointer to a string to print if it was given
+* @return	void
+*/
+void user_request_date(st_date* p_date, char* p_message)
+{
+	//print a message (if not NULL) and get the date.
+	if (p_message != NULL)
+	{
+		printf(p_message);
+	}
+	scanf("%d/%d/%d", &p_date->year, &p_date->month, &p_date->day);
+	flush_keyboard_input();	//flush input
+
+	//check for invalid input
+	while (is_date_valid(p_date) != 0)
+	{
+		printf("INVALID DATE! TRY AGAIN AND USE THE GIVEN FORMAT: (YYYY/MM/DD): ");
+		scanf("%d/%d/%d", &p_date->year, &p_date->month, &p_date->day);
+		flush_keyboard_input();	//flush garbage input
+	}
+}
 
 
 
@@ -810,16 +772,8 @@ void user_request_date_range(	st_date* p_start_date,
 								int* p_start_year_month_in_days,
 								int* p_end_date_in_days,
 								int* p_end_year_month_in_days)
-
-
 {
 	int dates_valid = 0;
-
-	//preset structures to 0
-	//memset(p_start_date, 0, sizeof(*p_start_date));
-	//memset(p_end_date, 0, sizeof(*p_end_date));
-
-	//TODO: MAKE THIS A FUNCTION, MIGHT ALSO BE USED FOR DELETE IN RANGE
 	do
 	{
 		//get the start-date
@@ -848,8 +802,6 @@ void user_request_date_range(	st_date* p_start_date,
 
 	return;
 }
-
-
 
 
 
@@ -889,34 +841,6 @@ void print_appointments_in_range_or_all(st_root* p_root, int print_all)
 									&start_year_month_in_days,
 									&end_date_in_days,
 									&end_year_month_in_days);
-#if 0
-		//TODO: MAKE THIS A FUNCTION, MIGHT ALSO BE USED FOR DELETE IN RANGE
-		do
-		{
-			//get the start-date
-			user_request_date(&start_date, "Please give the date where you want to start searching: (YYYY/MM/DD) ");
-			//get the end-date
-			user_request_date(&end_date, "Please give the date where you want to stop searching: (YYYY/MM/DD) ");
-
-			start_date_in_days = date_to_int(start_date.year, start_date.month, start_date.day);
-			end_date_in_days = date_to_int(end_date.year, end_date.month, end_date.day);
-			//Check if end-date is earlier than start-date.
-			if (end_date_in_days < start_date_in_days)
-			{
-				//dates are NOT OK, repeat while loop until correct dates filled in.
-				printf("END-DATE OCCURS EARLIER THAN START-DATE!\n");
-				printf("Please try again (press enter).");
-				flush_keyboard_input();	//wait for enter and flush garbage input
-			}
-			else
-			{
-				//dates are OK, break off while loop and continue
-				start_year_month_in_days = date_to_int(start_date.year, start_date.month, 0);
-				end_year_month_in_days = date_to_int(end_date.year, end_date.month, 0);
-				dates_valid = 1;
-			}
-		} while (dates_valid == 0);
-#endif
 	}
 
 	//if print_all == 0 -> only print the appointments whose date are in range
@@ -976,136 +900,6 @@ void print_appointments_in_range_or_all(st_root* p_root, int print_all)
 	{	//in case nothing was found while searching in a range
 		printf("No appointments found in this range!\n");
 	}
-}
-
-
-
-
-
-void print_appointments_in_range(st_root* p_root)
-{
-	print_appointments_in_range_or_all(p_root, 0);
-	//st_date start_date;
-	//st_date end_date;
-	//int dates_valid=0;
-	//int start_date_in_days;
-	//int start_year_month_in_days;
-	//int end_date_in_days;
-	//int end_year_month_in_days;
-	////if tree is empty
-	//if (p_root->pl_year == NULL)
-	//{
-	//	printf("Tree is empty! Nothing to print!\n");
-	//	return;
-	//}
-
-	//do
-	//{
-	//	//get the start-date
-	//	user_request_date(&start_date, "Please give the date where you want to start searching: (YYYY/MM/DD) ");
-	//	//get the end-date
-	//	user_request_date(&end_date, "Please give the date where you want to stop searching: (YYYY/MM/DD) ");
-
-	//	start_date_in_days = date_to_int(start_date.year, start_date.month, start_date.day);
-	//	end_date_in_days = date_to_int(end_date.year, end_date.month, end_date.day);
-	//	//Check if end-date is earlier than start-date.
-	//	if (end_date_in_days < start_date_in_days)
-	//	{
-	//		//dates are NOT OK, repeat while loop until correct dates filled in.
-	//		printf("END-DATE OCCURS EARLIER THAN START-DATE!\n");
-	//		printf("Please try again (press enter).");
-	//		flush_keyboard_input();	//wait for enter and flush garbage input
-	//	}
-	//	else
-	//	{
-	//		//dates are OK, break off while loop and continue
-	//		start_year_month_in_days = date_to_int(start_date.year, start_date.month, 0);
-	//		end_year_month_in_days = date_to_int(end_date.year, end_date.month, 0);
-	//		dates_valid = 1;
-	//	}
-	//} while (dates_valid == 0);
-
-
-	////only print the appointments whose date are in range
-	//st_year* p_year = p_root->pl_year;
-	////set flag in case nothing was found
-	//int found = 0;
-
-	////browse through years, months and days
-	//while (p_year != NULL)
-	//{
-	//	if ((start_date.year <= p_year->year) && (p_year->year <= end_date.year))
-	//	{
-	//		st_month* p_month = p_year->pl_month;
-	//		while (p_month != NULL)
-	//		{
-	//			int current_year_month_in_days = date_to_int(p_year->year, p_month->month, 0);
-	//			if ((start_year_month_in_days <= current_year_month_in_days) && (current_year_month_in_days <= end_year_month_in_days))
-	//			//if	((start_date.month <= p_month->month) && (p_month->month <= end_date.month))
-	//			{
-	//				st_day* p_day = p_month->pl_day;
-	//				while (p_day != NULL)
-	//				{
-	//					int current_date_in_days = current_year_month_in_days + p_day->day;
-	//					if ((start_date_in_days <= current_date_in_days) && (current_date_in_days <= end_date_in_days))
-	//					//if ((start_date.day <= p_day->day) && (p_day->day <= end_date.day))
-	//					{
-	//						printf("Date: %04d/%02d/%02d\n\n", p_year->year, p_month->month, p_day->day);
-	//						st_appointment* p_appointment = p_day->pl_appointment;
-	//						while (p_appointment != NULL)
-	//						{
-	//							print_appointment_details(p_appointment);
-	//							found = 1;
-	//							p_appointment = p_appointment->pl_next_appointment;
-	//						}
-	//					}
-	//					p_day = p_day->pl_next_day;	//goto next day in linked list
-	//				}
-	//			}
-	//			p_month = p_month->pl_next_month; //goto next month in linked list
-	//		}
-	//	}
-	//	p_year = p_year->pl_next_year; //goto next year in linked list
-	//}
-
-	//if (found == 0)
-	//{
-	//	printf("No appointments found in this range!\n");
-	//}
-}
-
-void print_appointments_from_tree(st_root* p_root)
-{
-	print_appointments_in_range_or_all(p_root, 1);
-	//st_year* p_year = p_root->pl_year;
-
-	//if (p_year == NULL)
-	//{
-	//	printf("Tree is empty! Nothing to display!\n");
-	//	return;
-	//}
-
-	//while (p_year != NULL)
-	//{
-	//	st_month* p_month = p_year->pl_month;
-	//	while (p_month != NULL)
-	//	{
-	//		st_day* p_day = p_month->pl_day;
-	//		while (p_day != NULL)
-	//		{
-	//			printf("Date: %04d/%02d/%02d\n", p_year->year, p_month->month, p_day->day);
-	//			st_appointment* p_appointment = p_day->pl_appointment;
-	//			while (p_appointment != NULL)
-	//			{
-	//				print_appointment_details(p_appointment);
-	//				p_appointment = p_appointment->pl_next_appointment;
-	//			}
-	//			p_day = p_day->pl_next_day;
-	//		}
-	//		p_month = p_month->pl_next_month;
-	//	}
-	//	p_year = p_year->pl_next_year;
-	//}
 }
 
 
@@ -1299,7 +1093,7 @@ void import_calendar_file(st_root* p_root, char* default_filename)
 			default:
 				printf("Something unexpected occurred!\n");
 		}
-		remove_tree(p_root, 0);	//remove partly imported tree 
+		remove_appointments_in_range_or_all(p_root, 1, 1);	//remove partly imported tree 
 	}
 	else
 	{
@@ -1494,61 +1288,10 @@ void add_appointment_manually(st_root* p_root)
 #endif
 	//get date
 	user_request_date(&new_appointment.date, "Give the date of your appointment. (Format: YYYY/MM/DD) : ");
-	//printf("Give the date of your appointment. (Format: YYYY/MM/DD) : ");
-	////scanf("%d", &new_appointment.date.year);
-	//scanf("%d/%d/%d", &new_appointment.date.year, &new_appointment.date.month, &new_appointment.date.day);
-
-	////in case of invalid date input
-	//while (is_date_valid(&new_appointment.date) != 0)
-	//{
-	//	//flush garbage input
-	//	flush_keyboard_input();
-	//	printf("INVALID DATE. USE THE GIVEN FORMAT: (YYYY/MM/DD) ");
-	//	 scanf("%d/%d/%d", &new_appointment.date.year, &new_appointment.date.month, &new_appointment.date.day);
-	//}
 
 	//get specific time when appointment starts
-	printf("Give the specific time when your appointment starts. (Format: HH:MM) : ");
-	scanf("%d:%d", &new_appointment.time_start.hour, &new_appointment.time_start.minute);
+	user_request_time_range(&new_appointment.time_start, &new_appointment.time_end);
 
-	//in case of invalid time input
-	while (is_time_valid(&new_appointment.time_start) != 0)
-	{
-		//flush garbage input
-		flush_keyboard_input();
-		printf("INVALID TIME. USE THE GIVEN FORMAT: (HH:MM) ");
-		scanf("%d:%d", &new_appointment.time_start.hour, &new_appointment.time_start.minute);
-	}
-
-	//get specific time when appointment ends
-	printf("Give the specific time when your appointment ends. (Format: HH:MM) : ");
-	scanf("%d:%d", &new_appointment.time_end.hour, &new_appointment.time_end.minute);
-
-	//in case of invalid time input OR time-end is earlier than time-start
-	while ((is_time_valid(&new_appointment.time_start) != 0) ||
-		is_end_time_valid_to_start_time(&new_appointment.time_end, &new_appointment.time_start))
-		//new_appointment.time_end.hour * 60 + new_appointment.time_end.minute < new_appointment.time_start.hour * 60 + new_appointment.time_start.minute)
-	{
-		//flush garbage input
-		flush_keyboard_input();
-
-		//when time is an invalid input:
-		if (is_time_valid(&new_appointment.time_start) != 0)
-		{
-			printf("INVALID TIME. USE THE GIVEN FORMAT: (HH:MM) ");
-		}
-		//when time-end is earlier than time-start:
-		else 
-		{
-			printf("TIME-END OCCURS EARLIER THAN OR AT TIME-START!\n");
-			printf("Please try again: (HH:MM):");
-		}
-		
-		scanf("%d:%d", &new_appointment.time_end.hour, &new_appointment.time_end.minute);
-	}
-
-	//flush keyboard input
-	flush_keyboard_input();
 
 	//generate unique id for this appointment
 	new_appointment.id = generate_id();
@@ -1602,54 +1345,6 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 								&start_year_month_in_days,
 								&end_date_in_days,
 								&end_year_month_in_days);
-		
-#if 0
-		do
-		{
-			//get the start-date
-			printf("Please give the date where you want to start searching: (YYYY/MM/DD) ");
-			scanf("%d/%d/%d", &start_date.year, &start_date.month, &start_date.day);
-			flush_keyboard_input();	//flush input
-			//check for invalid input
-			while (is_date_valid(&start_date) != 0)
-			{
-				printf("INVALID DATE! USE THE GIVEN FORMAT: (YYYY/MM/DD) ");
-				scanf("%d/%d/%d", &start_date.year, &start_date.month, &start_date.day);
-				flush_keyboard_input();	//flush garbage input
-			}
-
-			//get the end-date
-			printf("Please give the date where you want to stop searching: (YYYY/MM/DD) ");
-			scanf("%d/%d/%d", &end_date.year, &end_date.month, &end_date.day);
-			flush_keyboard_input();	//flush input
-			//check for invalid input
-			while (is_date_valid(&end_date) != 0)
-			{
-				printf("INVALID DATE! USE THE GIVEN FORMAT: (YYYY/MM/DD) ");
-				scanf("%d/%d/%d", &end_date.year, &end_date.month, &end_date.day);
-				flush_keyboard_input();	//flush garbage input
-			}
-
-			start_date_in_days = date_to_int(start_date.year, start_date.month, start_date.day);
-			end_date_in_days = date_to_int(end_date.year, end_date.month, end_date.day);
-
-			//Check if end-date is earlier than start-date.
-			if (end_date_in_days < start_date_in_days)
-			{
-				//dates are NOT OK, repeat while loop until correct dates filled in.
-				printf("END-DATE OCCURS EARLIER THAN START-DATE!\n");
-				printf("Please try again (press enter).");
-				flush_keyboard_input();	//wait for enter and flush garbage input
-			}
-			else
-			{
-				//dates are OK, break off while loop and continue
-				start_year_month_in_days = date_to_int(start_date.year, start_date.month, 0);	//create also the start date in days of the current year+month
-				end_year_month_in_days = date_to_int(end_date.year, end_date.month, 0);			//create also the end date in days of the current year+month
-				dates_valid = 1;
-			}
-		} while (dates_valid == 0);
-#endif
 	}
 
 	//if remove_all == 0 -> only remove the appointments whose date are in range
@@ -1800,331 +1495,19 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 	else
 	{
 		printf("Calendar completely removed!\n");
+		//root points to NULL (init root)
+		init_root(p_root);
 	}
 }
 
-void remove_appointments_in_range(st_root* p_root)
-{
-	remove_appointments_in_range_or_all(p_root, 0, 1);
-//	st_date start_date;
-//	st_date end_date;
-//	int dates_valid = 0;
-//	int start_date_in_days;
-//	int end_date_in_days;
-//	int start_year_month_in_days;
-//	int end_year_month_in_days;
-//
-//	st_year* p_year = p_root->pl_year;
-//	//if tree is already empty
-//	if (p_year == NULL)
-//	{
-//		printf("Tree is emtpy! Nothing to delete!\n");
-//		return;
-//	}
-//
-//	do
-//	{
-//		//get the start-date
-//		printf("Please give the date where you want to start searching: (YYYY/MM/DD) ");
-//		scanf("%d/%d/%d", &start_date.year, &start_date.month, &start_date.day);
-//		flush_keyboard_input();	//flush input
-//		//check for invalid input
-//		while (is_date_valid(&start_date) != 0)
-//		{
-//			printf("INVALID DATE! USE THE GIVEN FORMAT: (YYYY/MM/DD) ");
-//			scanf("%d/%d/%d", &start_date.year, &start_date.month, &start_date.day);
-//			flush_keyboard_input();	//flush garbage input
-//		}
-//
-//		//get the end-date
-//		printf("Please give the date where you want to stop searching: (YYYY/MM/DD) ");
-//		scanf("%d/%d/%d", &end_date.year, &end_date.month, &end_date.day);
-//		flush_keyboard_input();	//flush input
-//		//check for invalid input
-//		while (is_date_valid(&end_date) != 0)
-//		{
-//			printf("INVALID DATE! USE THE GIVEN FORMAT: (YYYY/MM/DD) ");
-//			scanf("%d/%d/%d", &end_date.year, &end_date.month, &end_date.day);
-//			flush_keyboard_input();	//flush garbage input
-//		}
-//
-//		start_date_in_days = date_to_int(start_date.year, start_date.month, start_date.day);
-//		end_date_in_days = date_to_int(end_date.year, end_date.month, end_date.day);
-//
-//		//Check if end-date is earlier than start-date.
-//		if (end_date_in_days < start_date_in_days)
-//		{
-//			//dates are NOT OK, repeat while loop until correct dates filled in.
-//			printf("END-DATE OCCURS EARLIER THAN START-DATE!\n");
-//			printf("Please try again (press enter).");
-//			flush_keyboard_input();	//wait for enter and flush garbage input
-//		}
-//		else
-//		{
-//			//dates are OK, break off while loop and continue
-//			start_year_month_in_days = date_to_int(start_date.year, start_date.month, 0);	//create also the start date in days of the current year+month
-//			end_year_month_in_days = date_to_int(end_date.year, end_date.month, 0);			//create also the end date in days of the current year+month
-//			dates_valid = 1;
-//		}
-//	} while (dates_valid == 0);
-//
-//	//set flag in case nothing was found
-//	int found = 0;
-//
-//	//browse through years, months and days
-//	
-//	st_year* p_last_year_before_range = NULL;
-//	while (p_year != NULL)
-//	{
-//		//create backup for year
-//		st_year* backup_pl_next_year = p_year->pl_next_year;
-//
-//		if ((start_date.year <= p_year->year) && (p_year->year <= end_date.year))
-//		{
-//			st_month* p_month = p_year->pl_month;
-//			st_month* p_last_month_before_range = NULL;
-//			while (p_month != NULL)
-//			{
-//				//create backup for month
-//				st_month* backup_pl_next_month = p_month->pl_next_month;
-//				int current_year_month_in_days = date_to_int(p_year->year, p_month->month, 0);
-//
-//				if ((start_year_month_in_days <= current_year_month_in_days) && (current_year_month_in_days <= end_year_month_in_days))
-//				//if ((start_date.month <= p_month->month) && (p_month->month <= end_date.month))
-//				{
-//					st_day* p_day = p_month->pl_day;
-//					st_day* p_last_day_before_range = NULL;
-//					while (p_day != NULL)
-//					{
-//						//create backup for day
-//						st_day* backup_pl_next_day = p_day->pl_next_day;
-//						int current_year_month_day_in_days = current_year_month_in_days + p_day->day;
-//						if ((start_date_in_days <= current_year_month_day_in_days) && (current_year_month_day_in_days <= end_date_in_days))
-//						//if ((start_date.day <= p_day->day) && (p_day->day <= end_date.day))
-//						{
-//							st_appointment* p_appointment = p_day->pl_appointment;
-//							while (p_appointment != NULL)
-//							{
-//								
-//								//if there is an appointment found, delete it and goto next
-//								st_appointment* backup_pl_next_appointment = p_appointment->pl_next_appointment;
-//#ifdef USE_MALLOCS
-//								//before we free the allocated appointment, free first the allocated strings
-//								// TODO MAKE THIS A FUNCTION									
-//								free(p_appointment->p_title);
-//								free(p_appointment->p_description);
-//								free(p_appointment->p_location_description);
-//#endif
-//								free(p_appointment);
-//								p_appointment = backup_pl_next_appointment;
-//								
-//								found++;
-//							}
-//						
-//							//appointments have been freed, now free day and re-link last day before range
-//							free(p_day);
-//
-//							if (p_last_day_before_range != NULL)
-//							{
-//								p_last_day_before_range->pl_next_day = backup_pl_next_day;
-//							}
-//							
-//							else
-//							{	//if first day is in range
-//								p_month->pl_day = backup_pl_next_day;
-//							}
-//
-//						}
-//						
-//						else
-//						{	//when day is not in range, refresh backup pointer
-//							p_last_day_before_range = p_day;
-//						}
-//						p_day = backup_pl_next_day;	//goto next day in linked list
-//					}
-//					//if all days in the month have been freed, free month
-//					if (p_month->pl_day == NULL)
-//					{ 
-//						free(p_month);
-//
-//						if (p_last_month_before_range != NULL)
-//						{
-//							p_last_month_before_range->pl_next_month = backup_pl_next_month;
-//						}
-//						
-//						else
-//						{	//if first month is in range
-//							p_year->pl_month = backup_pl_next_month;
-//						}
-//
-//					}
-//
-//
-//				}
-//				
-//				else
-//				{	//when month is out of range, refresh backup pointer
-//					p_last_month_before_range = p_month;
-//				}
-//				p_month = backup_pl_next_month; //goto next month in linked list
-//			}
-//
-//			//if all months in the year have been freed, free year
-//			if (p_year->pl_month == NULL)
-//			{
-//				free(p_year);
-//
-//				if (p_last_year_before_range != NULL)
-//				{
-//					p_last_year_before_range->pl_next_year = backup_pl_next_year;
-//				}
-//				else
-//				{	//first year is in range
-//					p_root->pl_year = backup_pl_next_year;
-//				}
-//
-//			}
-//		}
-//		else
-//		{	//when year is out of range, refresh backup pointer
-//			p_last_year_before_range = p_year;
-//		}
-//		p_year = backup_pl_next_year; //goto next year in linked list
-//	}
-//
-//	//if no appointments were found in range
-//	if (found == 0)
-//	{
-//		printf("No appointments were found within this range! Nothing has been deleted.\n");
-//	}
-//	else
-//	{
-//		printf("%d appointments deleted!\n", found);
-//	}
-}
+//#define remove_all_appointments(p_root)		remove_appointments_in_range_or_all(p_root, 1, 0)
 
 
-void remove_tree(st_root* p_root, int print_details)
-{
-	remove_appointments_in_range_or_all(p_root, 1, 1);
-//	st_year* p_year = p_root->pl_year;
-//	
-//	//if tree is already empty
-//	if ((p_year == NULL) && (print_details != 0))
-//	{
-//		printf("Nothing to delete!\n");
-//		return;
-//	}
-//
-//	while (p_year != NULL)
-//	{
-//		st_month* p_month = p_year->pl_month;
-//		while (p_month != NULL)
-//		{
-//			st_day* p_day = p_month->pl_day;
-//			while (p_day != NULL)
-//			{
-//				
-//				st_appointment* p_appointment = p_day->pl_appointment;
-//				while (p_appointment != NULL)
-//				{
-//		
-//					//if there is an appointment found, delete it and goto next
-//					st_appointment* backup_p_appointment = p_appointment->pl_next_appointment;
-//#ifdef USE_MALLOCS
-//					//before we free the allocated appointment,free first the allocated strings
-//					//TODO MAKE THIS A FUNCTION
-//					free(p_appointment->p_title);
-//					free(p_appointment->p_description);
-//					free(p_appointment->p_location_description);
-//#endif
-//					free(p_appointment);
-//					p_appointment = backup_p_appointment;
-//					
-//				}
-//				//if there are more days left, free the first struct and go to next
-//				if (p_day->pl_next_day != NULL)
-//				{
-//					st_day* backup_p_day = p_day->pl_next_day;
-//					free(p_day);
-//					p_day = backup_p_day;
-//				}
-//				//when one day is left, remove the struct
-//				else
-//				{
-//					free(p_day);
-//					p_day = NULL;
-//				}
-//
-//				//p_day = p_day->pl_next_day;
-//			}
-//			//if there are more months left, free the first struct and go to next
-//			if (p_month->pl_next_month != NULL)
-//			{
-//				st_month* backup_p_month = p_month->pl_next_month;
-//				free(p_month);
-//				p_month = backup_p_month;
-//			}
-//			//when one month is left, remove the struct
-//			else
-//			{
-//				free(p_month);
-//				p_month = NULL;
-//			}
-//
-//			//p_month = p_month->pl_next_month;
-//		}
-//		//if there are more years left, free the first struct and go to next
-//		if (p_year->pl_next_year != NULL)
-//		{
-//			st_year* backup_p_year = p_year->pl_next_year;
-//			free(p_year);
-//			p_year = backup_p_year;
-//		}
-//		//when one year is left, remove the struct
-//		else
-//		{
-//			free(p_year);
-//			p_year = NULL;
-//		}
-//		//p_year = p_year->pl_next_year;
-//	}
-
-	//root points to NULL (init root)
-	init_root(p_root);
-
-	/*if (print_details != 0)
-	{
-		printf("Calendar completely removed!\n");
-	}*/
-	
-	/*p_root->pl_year = NULL;*/
-
-}
-
-/**
-* @brief	This function initializes the root struct
-* @param	p_root (st_root*) The address of the root struct
-* @return	void
-*/
-void init_root(st_root* p_root)
-{
-
-	p_root->pl_year = NULL;
-
-}
-
-
-
-
-
-
-
-// TODO: import and export file
-// TODO: add appointment function
-// TODO: print calendar function
-// TODO: remove calendar function
-// TODO: what to do with same time appoitnment
+// TODO: import and export file (remove the absolute paths of the default file)
+// TODO: add appointment function (done)
+// TODO: print calendar function (done)
+// TODO: remove calendar function (done)
+// TODO: what to do with same time appoitnment (done)
 // TODO: CATCH MALLOC ERRORS
 // TODO: CHECK FGETS AND SCANF ERRORS (LIKE IF ITS EMPTY OR IF IT HAS EXCEEDED)
 
