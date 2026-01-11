@@ -18,10 +18,52 @@ void* malloc_s(size_t size)
 	if (p_malloc_location == NULL)
 	{
 		printf("Malloc allocation error has occurred!\nAborting program...");
-		exit(EXIT_FAILURE);
+		exit(EXIT_FAILURE);	//source: https://www.geeksforgeeks.org/c/c-exit-abort-and-assert-functions/
 	}
 
 	return p_malloc_location;
+}
+
+/**
+* @brief	A safe version of fgets. It will check your input constantly and give you retries when your string input was invalid.
+* @param	p_destination (char*) The address of the destination.
+* @param	max_size (int) The max size your input can hold.
+* @param	stream (FILE*) The stream you want to use (like stdin).
+* @param	mandatory_input (int) If 0, this function can accept empty input. If NOT 0, it prompts you to try again.
+* @param	p_message (char*) An optional message to print at the start.
+*/
+void fgets_s(char* p_destination, int max_size, FILE* stream, int mandatory_input, char* p_message)
+{
+
+	if (p_message != NULL)
+	{	//print a message (if not NULL)
+		printf(p_message);
+	}
+
+	int str_input_is_ok = 0;	//variable to check if input is valid
+
+	do
+	{	//get user input
+		fgets(p_destination, max_size, stream);
+		while (p_destination[strlen(p_destination) - 1] != '\n')	//get rid of potential overflow
+		{
+			printf("Input was longer than %d characters! Please try again: ", max_size - 2);
+			flush_keyboard_input();
+			fgets(p_destination, max_size, stream);
+		}
+		p_destination[strlen(p_destination) - 1] = '\0';	//get rid of '\n'
+
+		if ((mandatory_input != 0) &&	//in case of empty input while it was mandatory
+			strlen(p_destination) == 0)
+		{
+			printf("Input was empty while it was mandatory! Please try again: ");
+		}
+		else
+		{
+			str_input_is_ok = 1;
+		}
+	} while (str_input_is_ok == 0);
+	
 }
 
 /**

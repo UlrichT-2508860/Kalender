@@ -540,8 +540,8 @@ void print_appointment_details(st_appointment* p_appointment)
 
 
 /**
-* @brief	This function will print all appointments that match with a string the user gives
-* @param	p_root (st_root*) The address of the root struct
+* @brief	This function will print all appointments that contains a (sub)string the user gives.
+* @param	p_root (st_root*) The address of the root struct.
 * @return	void
 */
 void print_appointments_with_match(st_root* p_root)
@@ -558,25 +558,26 @@ void print_appointments_with_match(st_root* p_root)
 	//get match string
 	char match_string[MAX_TITLE_LENGTH + 1];
 
-	printf("Give the string you want to search for: ");
-	
-	fgets(match_string, sizeof(match_string), stdin);
-	//TODO: GENERALIZE THIS FUNCTION FOR ALMOST EVERY FGETS
+	fgets_s(match_string, sizeof(match_string), stdin, 1, "Give the string you want to search for: ");
+	//printf("Give the string you want to search for: ");
+	//
+	//fgets(match_string, sizeof(match_string), stdin);
+	////TODO: GENERALIZE THIS FUNCTION FOR ALMOST EVERY FGETS
 
-	//when invalid input (aka empty), try again
-	while (match_string[0] == '\n' ||
-		(match_string[strlen(match_string) - 1] != '\n'))
-	{
-		printf("You gave an empty input or you exceeded the given max length! Please try again: ");
-		if (match_string[strlen(match_string) - 1] != '\n')
-		{
-			flush_keyboard_input();
-		}
-		fgets(match_string, MAX_TITLE_LENGTH, stdin);
-	}
+	////when invalid input (aka empty), try again
+	//while (match_string[0] == '\n' ||
+	//	(match_string[strlen(match_string) - 1] != '\n'))
+	//{
+	//	printf("You gave an empty input or you exceeded the given max length! Please try again: ");
+	//	if (match_string[strlen(match_string) - 1] != '\n')
+	//	{
+	//		flush_keyboard_input();
+	//	}
+	//	fgets(match_string, MAX_TITLE_LENGTH, stdin);
+	//}
 
-	//remove the '\n'
-	match_string[strlen(match_string) - 1] = '\0';
+	////remove the '\n'
+	//match_string[strlen(match_string) - 1] = '\0';
 
 	string_to_lower(match_string); //lower the match string (case-insensitive)
 	int found = 0;
@@ -695,12 +696,12 @@ void user_request_time_range(st_date* p_start_time,	st_date* p_end_time)
 */
 void user_request_date(st_date* p_date, char* p_message)
 {
-	//print a message (if not NULL) and get the date.
+	 
 	if (p_message != NULL)
-	{
+	{	//print a message (if not NULL)
 		printf(p_message);
 	}
-	scanf("%d/%d/%d", &p_date->year, &p_date->month, &p_date->day);
+	scanf("%d/%d/%d", &p_date->year, &p_date->month, &p_date->day);	//get the date
 	flush_keyboard_input();	//flush input
 
 	//check for invalid input
@@ -1131,55 +1132,58 @@ void add_appointment_manually(st_root* p_root)
 	char location_description[MAX_LOCATION_LENGTH + 1];
 
 	//get title of appointment
-	printf("Give the title of your appointment: ");
+	fgets_s(title, sizeof(title), stdin, 1, "Give the title of your appointment: ");
+	//printf("Give the title of your appointment: ");
 
-	fgets(title, sizeof(title), stdin);
+	//fgets(title, sizeof(title), stdin);
 
-	while ((strlen(title) - 1 == 0) ||
-		(strlen(title) - 1 > MAX_TITLE_LENGTH) ||
-		title[strlen(title) - 1] != '\n')
-	{
-		printf("Title of entry was empty or was longer than %d characters! Please try again: ", MAX_TITLE_LENGTH - 1); 
-		if (title[strlen(title) - 1] != '\n')
-		{
-			flush_keyboard_input();
-		}
-		fgets(title, sizeof(title), stdin);
-	}
-	//remove '\n'
-	title[strlen(title) - 1] = '\0';
+	//while ((strlen(title) - 1 == 0) ||
+	//	(strlen(title) - 1 > MAX_TITLE_LENGTH) ||
+	//	title[strlen(title) - 1] != '\n')
+	//{
+	//	printf("Title of entry was empty or was longer than %d characters! Please try again: ", MAX_TITLE_LENGTH - 1); 
+	//	if (title[strlen(title) - 1] != '\n')
+	//	{
+	//		flush_keyboard_input();
+	//	}
+	//	fgets(title, sizeof(title), stdin);
+	//}
+	////remove '\n'
+	//title[strlen(title) - 1] = '\0';
 
 	new_appointment.p_title = malloc_s(strlen(title) + 1); // malloc + 1 for nullbyte
 	strcpy(new_appointment.p_title, title);
 
 	//get optional description
-	printf("Give an optional description of your appointment: ");
+	fgets_s(description, sizeof(description), stdin, 0, "Give an optional description of your appointment: ");
+	//printf("Give an optional description of your appointment: ");
 
-	fgets(description, sizeof(description), stdin);
+	//fgets(description, sizeof(description), stdin);
 
-	while (strlen(description) - 1 > MAX_DESCRIPTION_LENGTH)
-	{
-		printf("Description of entry was longer than %d characters! Please try again: ", MAX_DESCRIPTION_LENGTH - 1);
-		fgets(title, sizeof(title), stdin);
-	}
-	//remove '\n'
-	description[strlen(description) - 1] = '\0';
+	//while (strlen(description) - 1 > MAX_DESCRIPTION_LENGTH)
+	//{
+	//	printf("Description of entry was longer than %d characters! Please try again: ", MAX_DESCRIPTION_LENGTH - 1);
+	//	fgets(title, sizeof(title), stdin);
+	//}
+	////remove '\n'
+	//description[strlen(description) - 1] = '\0';
 
 	new_appointment.p_description = malloc_s(strlen(description) + 1); // malloc + 1 for nullbyte
 	strcpy(new_appointment.p_description, description);
 
 	//get optional location description
-	printf("Give an optional location description of your appointment: ");
+	fgets_s(location_description, sizeof(location_description), stdin, 0, "Give an optional location descrption of your appointment: ");
+	//printf("Give an optional location description of your appointment: ");
 
-	fgets(location_description, sizeof(location_description), stdin);
+	//fgets(location_description, sizeof(location_description), stdin);
 
-	while (strlen(location_description) - 1 > MAX_LOCATION_LENGTH)
-	{
-		printf("Location description of entry was longer than %d characters! Please try again: ", MAX_LOCATION_LENGTH - 1);
-		fgets(title, sizeof(title), stdin);
-	}
-	//remove '\n'
-	location_description[strlen(location_description) - 1] = '\0';
+	//while (strlen(location_description) - 1 > MAX_LOCATION_LENGTH)
+	//{
+	//	printf("Location description of entry was longer than %d characters! Please try again: ", MAX_LOCATION_LENGTH - 1);
+	//	fgets(title, sizeof(title), stdin);
+	//}
+	////remove '\n'
+	//location_description[strlen(location_description) - 1] = '\0';
 
 	new_appointment.p_location_description = malloc_s(strlen(location_description) + 1); // malloc + 1 for nullbyte
 	strcpy(new_appointment.p_location_description, location_description);
