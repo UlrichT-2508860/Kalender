@@ -10,6 +10,6 @@ void fgets_s(char* p_destination, int max_size, FILE* stream, int mandatory_inpu
 void flush_keyboard_input(void);
 char* my_strtok(char* str, const char* delimiter);
 void string_to_lower(char* string);
-
+int get_user_confirmation(char* p_message);
 
 #endif 

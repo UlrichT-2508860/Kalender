@@ -34,13 +34,12 @@ void* malloc_s(size_t size)
 */
 void fgets_s(char* p_destination, int max_size, FILE* stream, int mandatory_input, char* p_message)
 {
+	int str_input_is_ok = 0;	//variable to check if input is valid
 
 	if (p_message != NULL)
 	{	//print a message (if not NULL)
 		printf(p_message);
 	}
-
-	int str_input_is_ok = 0;	//variable to check if input is valid
 
 	do
 	{	//get user input
@@ -63,7 +62,6 @@ void fgets_s(char* p_destination, int max_size, FILE* stream, int mandatory_inpu
 			str_input_is_ok = 1;
 		}
 	} while (str_input_is_ok == 0);
-	
 }
 
 /**
@@ -74,6 +72,7 @@ void fgets_s(char* p_destination, int max_size, FILE* stream, int mandatory_inpu
 void flush_keyboard_input(void)
 {
 	char c;
+	//todo: change this function so that it wipes out everything in the input-buffer and does not wait until something is typed.
 	do
 	{
 		c = getchar();
@@ -81,6 +80,26 @@ void flush_keyboard_input(void)
 	} while ((c != '\n') && (c != EOF));
 
 }
+
+
+/**
+* @brief	A safe version of getchar. This function will clear the keyboard input stream after the character has been entered. 
+*			I noted that when a '\n' has been given, there will be nothing in the input stream. So there is no reason to flush in that case.
+*			This function exits with the input stream cleared.
+* @param	void
+* @return	c (char) The character entered.
+*/
+char getchar_s(void)
+{
+	char c = getchar();	//getchar always returns a character or a \n and leaves a \n in the stdin-buffer.
+	if (c != '\n')
+	{	//clean up all residues in stdin.
+		flush_keyboard_input();
+	}
+	return c;
+}
+
+
 
 /**
 * @brief	This function will split a string with a given delimiter, it also works
@@ -133,4 +152,39 @@ void string_to_lower(char* string)
 
 
 
+/**
+* @brief	This function asks the user for confirmation. The user either inputs 'y' to confirm, or 'n' to cancel.
+* @param	p_message (char*) An optional message to print at the start
+* @return	0 if 'n' is entered, 1 if 'y' is entered
+*/
+int get_user_confirmation(char* p_message)
+{
 
+	if (p_message != NULL)
+	{
+		printf(p_message);
+	}
+	else
+	{
+		printf("Type y/n: ");
+	}
+
+	while(1)
+	{	//Do always the following until a 'y' or 'n' character has been typed.
+		char c = tolower(getchar_s());
+		if (c == 'y')
+		{
+			printf("You decided to continue.\n");
+			return 1;
+		}
+		else if (c == 'n')
+		{
+			printf("You decided to cancel...\n");
+			return 0;
+		}
+		else
+		{
+			printf("Invalid input! Please try again (y/n) :");
+		}
+	}
+}
