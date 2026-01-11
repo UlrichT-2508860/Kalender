@@ -45,9 +45,11 @@ void* malloc_s(size_t size)
 }
 
 
-
 /**
-* @brief	This function will flush the input stream.
+* @brief	This function will flush the keyboard input stream. 
+*			If the keyboard stream is already empty: It will wait for a user entry (character + enter) (not so nice?)
+*			If the keyboard stream not empty: It will get the characters until it has found an enter (\n) character. 
+*			We presume the \n character as last character that could be present?
 * @param	void
 * @return	void
 */
@@ -64,6 +66,28 @@ void flush_keyboard_input(void)
 
 
 /**
+* @brief	This function will wait until the user has pressed the ENTER button.
+*			If the keyboard stream is already empty: It will wait for a user entry (character + enter)
+*			If the keyboard stream not empty: It will get the characters until it has found an enter (\n) character.
+* @param	void
+* @return	void
+*/
+void user_wait_for_Enter_Press(void)
+{
+#if 1
+	//same as flush_keyboard_input()??
+	flush_keyboard_input();
+#else
+	char c;
+	do
+	{
+		c = getchar();
+	} while ((c != '\n') && (c != EOF));
+#endif
+}
+
+
+/**
 * @brief	A safe version of getchar. This function will clear the keyboard input stream after the character has been entered. 
 *			I noted that when a '\n' has been given, there will be nothing in the input stream. So there is no reason to flush in that case.
 *			This function exits with the input stream cleared.
@@ -75,7 +99,7 @@ char getchar_s(void)
 	char c = getchar();	//getchar always returns a character or a \n and leaves a \n in the stdin-buffer.
 	if (c != '\n')
 	{	//clean up all residues in stdin.
-		flush_keyboard_input();
+		flush_keyboard_input();	//flush remaining keyboard input (including \n).
 	}
 	return c;
 }
@@ -165,7 +189,7 @@ void fgets_s(char* p_destination, int max_size, FILE* stream, int mandatory_inpu
 		while (p_destination[strlen(p_destination) - 1] != '\n')	//get rid of potential overflow
 		{
 			printf("Input was longer than %d characters! Please try again: ", max_size - 2);
-			flush_keyboard_input();
+			flush_keyboard_input();	//flush remaining keyboard input (including \n).
 			fgets(p_destination, max_size, stream);
 		}
 		p_destination[strlen(p_destination) - 1] = '\0';	//get rid of '\n'

@@ -8,6 +8,7 @@
 void clearscreen(void);
 void* malloc_s(size_t size);
 void flush_keyboard_input(void);
+void user_wait_for_Enter_Press(void);
 char getchar_s(void);
 char* my_strtok(char* str, const char* delimiter);
 void string_to_lower(char* string);
