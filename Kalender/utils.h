@@ -5,11 +5,14 @@
 
 
 //function prototypes
+void clearscreen(void);
 void* malloc_s(size_t size);
-void fgets_s(char* p_destination, int max_size, FILE* stream, int mandatory_input, char* p_message);
 void flush_keyboard_input(void);
+char getchar_s(void);
 char* my_strtok(char* str, const char* delimiter);
 void string_to_lower(char* string);
-int get_user_confirmation(char* p_message);
+void fgets_s(char* p_destination, int max_size, FILE* stream, int mandatory_input, char* p_message);
+void user_request_string(char* p_destination, int max_size, int mandatory_input, char* p_message);
+int user_request_confirmation(char* p_message);
 
 #endif 

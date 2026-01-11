@@ -5,26 +5,7 @@
 #include "Kalender.h"
 
 
-/**
-* @brief	This function should clear the terminal
-* @param	void
-* @return	void
-*/
-void clearscreen(void)
-{	//with the help of ANSI escape codes.
-	//source: https://stackoverflow.com/questions/37774983/clearing-the-screen-by-printing-a-character
-	printf("\033[2J\033[H"); //NOTE: this doesn't really "clear" the terminal put prints enough enters so the terminal is empty
-							 //you can still scroll up to see the history of what went down.
-	//fflush(stdout);
-	
-	//with the help of system commands, these vary from OS to OS though
-	//source: https://www.designgurus.io/answers/detail/how-to-clear-in-c-programming
-#ifdef _WIN32
-	system("cls");
-#else 
-	system("clear"); //for linux
-#endif
-}
+
 
 /**
  * @brief   This function prints the main menu. The user also inputs the option.
@@ -117,14 +98,15 @@ int process_menu_option(st_root* p_root, int choice)
 
 	case IMPORT_CALENDAR:
 
-		//import_calendar_file(p_root, "C:\\Users\\ulric\\OneDrive\\Dokumente\\Ulrich Tuts\\Universiteit\\2025 - 2026\\Problem Solving\\Kwartiel 2\\Individueel project\\Kalender\\Kalender_data.txt");
+		//import_calendar_file(p_root, "C:\\Users\\ulric\\OneDrive\\Dokumente\\Ulrich Tuts\\Universiteit\\2025 - 2026\\Problem Solving\\Kwartiel 2\\Individueel project\\Kalender\\Kalender\\Kalender_data.txt");
 		import_calendar_file(p_root, "C:\\Program Files Ulrich\\Kalender_data.txt");
 		//import_calendar_file(p_root, NULL);
 		break;
 
 	case EXPORT_CALENDAR:
-		export_calendar_file(p_root, "C:\\Program Files Ulrich\\new.txt");
-		//export_calendar_file(p_root, "new.txt");
+		//export_calendar_file(p_root, "C:\\Users\\ulric\\OneDrive\\Dokumente\\Ulrich Tuts\\Universiteit\\2025 - 2026\\Problem Solving\\Kwartiel 2\\Individueel project\\Kalender\\Kalender\\lil_cuh.txt");
+		//export_calendar_file(p_root, "C:\\Program Files Ulrich\\new.txt");
+		export_calendar_file(p_root, NULL);
 		break;
 
 	default:
@@ -140,25 +122,17 @@ int process_menu_option(st_root* p_root, int choice)
 
 int main(void)
 {
-	printf("Welcome back user!\n");
+	st_root root;
 	int processed_choice;
 
-	//char* my_string = malloc_s(100000000000);
-	//strcpy(my_string, "kiss my ass!");
+	printf("Welcome back user!\n");
 
-	st_root root;
-	init_root(&root);
+	init_root(&root);	//ALways init the calendar-root when the program starts
 
-
-	
 	do
 	{
-
-
 		int choice = write_menu_and_get_option();
-
 		processed_choice = process_menu_option(&root, choice);
-
 
 		//wait for user input to return to menu
 		if (processed_choice != EXIT_PROGRAM)
@@ -174,12 +148,8 @@ int main(void)
 
 			clearscreen();
 		}
-
-
 	} while (processed_choice != 0);
 		
-
-
 	return 0;
 
 }
