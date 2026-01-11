@@ -614,7 +614,7 @@ void user_request_time(st_time* p_time, char* p_message)
 		printf(p_message);
 	}
 	scanf_result = scanf("%d:%d", &p_time->hour, &p_time->minute);
-	flush_keyboard_input();	//flush garbage input
+	flush_keyboard_input();	//flush remaining keyboard input (including \n).
 
 	//check for invalid input
 	while ((is_time_valid(p_time) != 0) ||
@@ -622,7 +622,7 @@ void user_request_time(st_time* p_time, char* p_message)
 	{
 		printf("INVALID TIME. USE THE GIVEN FORMAT (HH:MM): ");
 		scanf_result = scanf("%d:%d", &p_time->hour, &p_time->minute);
-		flush_keyboard_input();	//flush garbage input
+		flush_keyboard_input();	//flush remaining keyboard input (including \n).
 	}
 }
 
@@ -652,7 +652,7 @@ void user_request_time_range(st_time* p_start_time,	st_time* p_end_time)
 			//times are NOT OK, repeat while loop until correct times filled in.
 			printf("END-time OCCURS EARLIER THAN START-time!\n");
 			printf("Please try again (press ENTER).");
-			flush_keyboard_input();	//wait for enter and flush garbage input
+			user_wait_for_Enter_Press();	//wait for enter and flush garbage input
 		}
 		else
 		{
@@ -679,7 +679,7 @@ void user_request_date(st_date* p_date, char* p_message)
 		printf(p_message);
 	}
 	scanf_result = scanf("%d/%d/%d", &p_date->year, &p_date->month, &p_date->day);	//get the date
-	flush_keyboard_input();	//flush input
+	flush_keyboard_input();	//flush remaining keyboard input (including \n).
 
 	//check for invalid input
 	while ((is_date_valid(p_date) != 0) ||
@@ -687,7 +687,7 @@ void user_request_date(st_date* p_date, char* p_message)
 	{
 		printf("INVALID DATE! TRY AGAIN AND USE THE GIVEN FORMAT: (YYYY/MM/DD): ");
 		scanf_result = scanf("%d/%d/%d", &p_date->year, &p_date->month, &p_date->day);
-		flush_keyboard_input();	//flush garbage input
+		flush_keyboard_input();	//flush remaining keyboard input (including \n).
 	}
 }
 
@@ -725,8 +725,8 @@ void user_request_date_range(	st_date* p_start_date,
 		{
 			//dates are NOT OK, repeat while loop until correct dates filled in.
 			printf("END-DATE OCCURS EARLIER THAN START-DATE!\n");
-			printf("Please try again (press enter).");
-			flush_keyboard_input();	//wait for enter and flush garbage input
+			printf("Please try again (press ENTER).");
+			user_wait_for_Enter_Press();	//wait for enter and flush garbage input
 		}
 		else
 		{
@@ -850,11 +850,15 @@ void print_appointments_in_range_or_all(st_root* p_root, int print_all)
 *			the item order is fixed as follows:
 *
 *				Title;Description;Location;Date;Time-start;Time-end;ID\n
+*
+*			So the contents of the file looks as follows:
+*
 *				Title;Description;Location;Date;Time-start;Time-end;ID\n
 *				Title;Description;Location;Date;Time-start;Time-end;ID\n
 *				Title;Description;Location;Date;Time-start;Time-end;ID\n
-* 
-* 
+*				.
+*				.
+*
 * @param	p_root (st_root*) The address of the root struct
 * @param	default_filename (char*) The default filename, could be NULL
 * @return	void

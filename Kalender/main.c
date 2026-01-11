@@ -31,25 +31,7 @@ static int write_menu_and_get_option(void)
 	{	//scanf went wrong, return illegal value
 		choice = -1;
 	}
-	//flush all remaining characters for next input
-	flush_keyboard_input();
-	//char c;
-	//do
-	//{
-	//	c = getchar();
-	//} while (c != '\n');
-
-	//while (c != '\n' && c != EOF)
-
-	//c = getchar();
-	//while (c != '\n' && c != EOF) 
-	//{
-	//	c = getchar();
-	//}
-
-
-	//while ((c = getchar()) != '\n' && c != EOF);
-	//getchar();
+	flush_keyboard_input();	//flush remaining keyboard input (including \n).
 	
 	return choice;
 }
@@ -123,32 +105,40 @@ int process_menu_option(st_root* p_root, int choice)
 int main(void)
 {
 	st_root root;
+	int choice;
 	int processed_choice;
 
 	printf("Welcome back user!\n");
 
-	init_root(&root);	//ALways init the calendar-root when the program starts
+	init_root(&root);	//Always init the calendar-root when the program starts
 
 	do
 	{
-		int choice = write_menu_and_get_option();
+		//Print the menu and wait for a user's choice..
+		choice = write_menu_and_get_option();
+		
+		//Execute the user's choice..
 		processed_choice = process_menu_option(&root, choice);
 
 		//wait for user input to return to menu
 		if (processed_choice != EXIT_PROGRAM)
 		{
 			printf("Press ENTER to return to menu.\n");
-			//getchar();
+
 			//flush all remaining characters for next input
+#if 1
+			user_wait_for_Enter_Press();	
+#else
 			char c;
 			do
 			{
 				c = getchar();
 			} while (c != '\n');
-
+#endif
+			// repeat menu but first clear screen.
 			clearscreen();
 		}
-	} while (processed_choice != 0);
+	} while (processed_choice != EXIT_PROGRAM);
 		
 	return 0;
 
