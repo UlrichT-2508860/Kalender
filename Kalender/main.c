@@ -36,12 +36,12 @@ static int write_menu_and_get_option(void)
 
 	printf("What would you like to do?\n"
 		"[0] Exit Program\n"
-		"[1] Add singular appointment\n"
+		"[1] Add appointment\n"
 		"[2] Remove appointments in a range\n"
 		"[3] Empty Calendar\n"
 		"[4] Display complete Calendar\n"
-		"[5] Write out appointments in a range\n"
-		"[6] Write out appointments based on textual matching\n"
+		"[5] Display appointments in a range\n"
+		"[6] Display appointments based on textual matching\n"
 		"[7] Import Calendar\n"
 		"[8] Export Calendar\n");
 
@@ -51,11 +51,12 @@ static int write_menu_and_get_option(void)
 		choice = -1;
 	}
 	//flush all remaining characters for next input
-	char c;
-	do
-	{
-		c = getchar();
-	} while (c != '\n');
+	flush_keyboard_input();
+	//char c;
+	//do
+	//{
+	//	c = getchar();
+	//} while (c != '\n');
 
 	//while (c != '\n' && c != EOF)
 
