@@ -136,7 +136,7 @@ void print_appointment_details(st_appointment* p_appointment);
 void print_appointments_with_match(st_root* p_root); //TODO:  FIX THIS WEIRD WARNING
 
 void user_request_time(st_time* p_time, char* p_message);
-void user_request_time_range(st_date* p_start_time, st_date* p_end_time);
+void user_request_time_range(st_time* p_start_time, st_time* p_end_time);
 void user_request_date(st_date* p_date, char* p_message);
 void user_request_date_range(	st_date* p_start_date,
 								st_date* p_end_date,

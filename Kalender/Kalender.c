@@ -9,8 +9,6 @@
 
 
 
-
-
 /**
 * @brief	This function will generate an ID based on the current time
 * @param	void
@@ -22,7 +20,7 @@ int generate_id(void)
 
 	time_t current_time = time(NULL); //get current time
 	//return (int)(current_time % 1000000000);
-	return (int) current_time;
+	return (unsigned int) current_time;
 
 }
 
@@ -68,6 +66,7 @@ int get_max_days_of_month(int year, int month)
 	return max_days;
 }
 
+
 /**
 * @brief	Converts a given date into the amount of days
 * @param	year (int) A given year
@@ -78,8 +77,8 @@ int get_max_days_of_month(int year, int month)
 int date_to_int(int year, int month, int day)
 {
 	int number_of_days = (year * 365) +		//add default number of days per year
-		((year - 1) / 4) +		//add leap days for all leap years.
-		day;				//add day in last month.
+		((year - 1) / 4) +					//add leap days for all leap years that happened before this year.
+		day;								//add day in last month.
 
 	//add days of past months
 	for (int i = 1; i < month; i++)
@@ -88,6 +87,7 @@ int date_to_int(int year, int month, int day)
 	}
 	return number_of_days;
 }
+
 
 /**
 * @brief	Checks if a given date struct is a valid date
@@ -110,7 +110,7 @@ int is_date_valid(st_date* p_date)
 	}
 
 	//calculate max days:
-	unsigned int max_days = get_max_days_of_month(p_date->year, p_date->month);
+	int max_days = get_max_days_of_month(p_date->year, p_date->month);
 	//check day
 	if ((p_date->day < 1) ||
 		(p_date->day > max_days))
@@ -121,6 +121,7 @@ int is_date_valid(st_date* p_date)
 	//date is valid
 	return 0;
 }
+
 
 /**
 * @brief	Check is a given time stuct is valid
@@ -147,6 +148,7 @@ int is_time_valid(st_time* p_time)
 	return 0;
 }
 
+
 /**
  * @brief	Checks if the end time falls before the start time
  * @param	p_end_time pointer to the end time struct
@@ -164,6 +166,9 @@ int is_end_time_valid_to_start_time(st_time* p_end_time, st_time* p_start_time)
 }
 
 
+//----------------------------------------------------------------
+//--          L I N K E D   L I S T   F U N C T I O N S         --
+//----------------------------------------------------------------
 
 /**
 * @brief	This function initializes the root struct
@@ -172,9 +177,7 @@ int is_end_time_valid_to_start_time(st_time* p_end_time, st_time* p_start_time)
 */
 void init_root(st_root* p_root)
 {
-
 	p_root->pl_year = NULL;
-
 }
 
 
@@ -245,7 +248,6 @@ st_year* get_or_create_year(st_root* p_this_root, int year)
 				previous_tmp_year->pl_next_year = tmp_new_year;
 			}
 		}
-
 	}
 	else
 	{
@@ -399,12 +401,10 @@ st_day* get_or_create_day(st_month* p_this_month, int day)
 		}
 		return tmp_new_day;
 	}
-
 	//day already present, return pointer 
 	return tmp_day;
-
-
 }
+
 
 /**
 * @brief	This function will create dynamically a new appointment struct in a given days linked-list and sorts it based on the start time of the appointment.
@@ -479,7 +479,6 @@ st_appointment* get_and_create_appointment(st_day* p_this_day, st_time* p_time_s
 }
 
 
-
 /**
 * @brief	This function will add a new appointment to the calendar tree
 * @param	p_root (st_root*) The address of the root struct
@@ -536,7 +535,9 @@ void print_appointment_details(st_appointment* p_appointment)
 	}
 }
 
-
+//----------------------------------------------------------------
+//- U S E R   R E L A T E D   C A L E N D A R  F U N C T I O N S -
+//----------------------------------------------------------------
 
 
 /**
@@ -557,29 +558,9 @@ void print_appointments_with_match(st_root* p_root)
 
 	//get match string
 	char match_string[MAX_TITLE_LENGTH + 1];
-
-	fgets_s(match_string, sizeof(match_string), stdin, 1, "Give the string you want to search for: ");
-	//printf("Give the string you want to search for: ");
-	//
-	//fgets(match_string, sizeof(match_string), stdin);
-	////TODO: GENERALIZE THIS FUNCTION FOR ALMOST EVERY FGETS
-
-	////when invalid input (aka empty), try again
-	//while (match_string[0] == '\n' ||
-	//	(match_string[strlen(match_string) - 1] != '\n'))
-	//{
-	//	printf("You gave an empty input or you exceeded the given max length! Please try again: ");
-	//	if (match_string[strlen(match_string) - 1] != '\n')
-	//	{
-	//		flush_keyboard_input();
-	//	}
-	//	fgets(match_string, MAX_TITLE_LENGTH, stdin);
-	//}
-
-	////remove the '\n'
-	//match_string[strlen(match_string) - 1] = '\0';
-
+	user_request_string(match_string, sizeof(match_string), 1, "Give the string you want to search for: ");
 	string_to_lower(match_string); //lower the match string (case-insensitive)
+	
 	int found = 0;
 	while (p_year != NULL)
 	{
@@ -589,7 +570,6 @@ void print_appointments_with_match(st_root* p_root)
 			st_day* p_day = p_month->pl_day;
 			while (p_day != NULL)
 			{
-				//printf("Date: %04d/%02d/%02d\n", p_year->year, p_month->month, p_day->day);
 				st_appointment* p_appointment = p_day->pl_appointment;
 				while (p_appointment != NULL)
 				{
@@ -598,14 +578,12 @@ void print_appointments_with_match(st_root* p_root)
 					strcpy(lowered_title, p_appointment->p_title);
 					string_to_lower(lowered_title);
 					if (strstr(lowered_title, match_string))
-					//if (strstr(p_appointment->p_title, match_string))
 					{
 						printf("Date: %04d/%02d/%02d\n", p_year->year, p_month->month, p_day->day);
 						print_appointment_details(p_appointment);
 						found = 1;
 					}
 					p_appointment = p_appointment->pl_next_appointment;
-
 				}
 				p_day = p_day->pl_next_day;
 			}
@@ -629,19 +607,21 @@ void print_appointments_with_match(st_root* p_root)
 */
 void user_request_time(st_time* p_time, char* p_message)
 {
+	int scanf_result;
 	//print a message (if not NULL) and get the time.
 	if (p_message != NULL)
 	{
 		printf(p_message);
 	}
-	scanf("%d:%d", &p_time->hour, &p_time->minute);
+	scanf_result = scanf("%d:%d", &p_time->hour, &p_time->minute);
 	flush_keyboard_input();	//flush garbage input
 
 	//check for invalid input
-	while (is_time_valid(p_time) != 0)
+	while ((is_time_valid(p_time) != 0) ||
+		(scanf_result != 2))
 	{
 		printf("INVALID TIME. USE THE GIVEN FORMAT (HH:MM): ");
-		scanf("%d:%d", &p_time->hour, &p_time->minute);
+		scanf_result = scanf("%d:%d", &p_time->hour, &p_time->minute);
 		flush_keyboard_input();	//flush garbage input
 	}
 }
@@ -656,7 +636,7 @@ void user_request_time(st_time* p_time, char* p_message)
 * @note		- errors if the entered time is in an incorrect format (HH/MM). The user needs to retry the entry.
 *			- errors if the end-time is on or before the start-time. The user needs to retry the entry of both times.
 */
-void user_request_time_range(st_date* p_start_time,	st_date* p_end_time)
+void user_request_time_range(st_time* p_start_time,	st_time* p_end_time)
 {
 	int times_valid = 0;
 	do
@@ -671,7 +651,7 @@ void user_request_time_range(st_date* p_start_time,	st_date* p_end_time)
 		{
 			//times are NOT OK, repeat while loop until correct times filled in.
 			printf("END-time OCCURS EARLIER THAN START-time!\n");
-			printf("Please try again (press enter).");
+			printf("Please try again (press ENTER).");
 			flush_keyboard_input();	//wait for enter and flush garbage input
 		}
 		else
@@ -685,9 +665,6 @@ void user_request_time_range(st_date* p_start_time,	st_date* p_end_time)
 }
 
 
-
-
-
 /**
 * @brief	This function requests the user to input a date and update a given date struct
 * @param	p_date (st_date*) The address to the date struct
@@ -696,19 +673,20 @@ void user_request_time_range(st_date* p_start_time,	st_date* p_end_time)
 */
 void user_request_date(st_date* p_date, char* p_message)
 {
-	 
+	int scanf_result;
 	if (p_message != NULL)
 	{	//print a message (if not NULL)
 		printf(p_message);
 	}
-	scanf("%d/%d/%d", &p_date->year, &p_date->month, &p_date->day);	//get the date
+	scanf_result = scanf("%d/%d/%d", &p_date->year, &p_date->month, &p_date->day);	//get the date
 	flush_keyboard_input();	//flush input
 
 	//check for invalid input
-	while (is_date_valid(p_date) != 0)
+	while ((is_date_valid(p_date) != 0) ||
+		(scanf_result != 3))
 	{
 		printf("INVALID DATE! TRY AGAIN AND USE THE GIVEN FORMAT: (YYYY/MM/DD): ");
-		scanf("%d/%d/%d", &p_date->year, &p_date->month, &p_date->day);
+		scanf_result = scanf("%d/%d/%d", &p_date->year, &p_date->month, &p_date->day);
 		flush_keyboard_input();	//flush garbage input
 	}
 }
@@ -761,8 +739,6 @@ void user_request_date_range(	st_date* p_start_date,
 
 	return;
 }
-
-
 
 
 /**
@@ -862,48 +838,54 @@ void print_appointments_in_range_or_all(st_root* p_root, int print_all)
 }
 
 
-
 /**
 * @brief	This function will import a calendar by using a txt file, reading it, and getting every member
 *			of an appointment struct. This function will crash when something invalid was read, it will delete
 *			the root afterwards.
+*
+*			Appointment Record-structure in file:
+*			- - - - - - - - - - - - - - - - - - -
+*			The contents of one appointment is specified on one line. The different item of the appointment are 
+*			seperated via a ";" character. (This is the FILE_DELIMITER)
+*			the item order is fixed as follows:
+*
+*				Title;Description;Location;Date;Time-start;Time-end;ID\n
+*				Title;Description;Location;Date;Time-start;Time-end;ID\n
+*				Title;Description;Location;Date;Time-start;Time-end;ID\n
+*				Title;Description;Location;Date;Time-start;Time-end;ID\n
+* 
+* 
 * @param	p_root (st_root*) The address of the root struct
 * @param	default_filename (char*) The default filename, could be NULL
 * @return	void
 */
 void import_calendar_file(st_root* p_root, char* default_filename)
 {
-
-	char tmp_filename[512];	//to store eventually manually entered filepath
-	int scanf_result;	//for checking scanf result
+	FILE* h_calendar_file;
+	char tmp_filename[512 + 2];	//to store eventually manually entered filepath + '\n' and nullbyte
+	int scanf_result;			//for checking scanf result
 	int import_error = 0;		//for keeping errors during import
 	int line_counter = 1;	
 	st_appointment tmp_appointment;
 	char s_line[ MAX_TITLE_LENGTH + MAX_LOCATION_LENGTH + MAX_DESCRIPTION_LENGTH + DATE_STR_LENGTH + (TIME_STR_LENGTH*2) + ID_STR_LENGTH + 10]; //use the size of the struct plus some extra characters for the separators.
-	//char s_line[sizeof(st_appointment) + 10 + MAX_TITLE_LENGTH + MAX_LOCATION_LENGTH + MAX_DESCRIPTION_LENGTH];
 	
 	//TODO: MAKE THIS A FUNCTION
 	if (default_filename == NULL)
 	{	//If no filename is given, request the filepath+filename from user:
-		printf("Please give the path to your .txt file: ");
-		fgets(tmp_filename, sizeof(tmp_filename), stdin);
-		tmp_filename[strlen(tmp_filename) - 1] = '\0';//remove \n
+		user_request_string(tmp_filename, sizeof(tmp_filename), 1, "Please give the path to your .txt file: ");
 		default_filename = tmp_filename;
 	}
 	else
 	{	//We still offer the choice to override the default filename
-		printf("Please give the path to your .txt file or press enter to use the default calendar-file (%s) : ", default_filename);
-		fgets(tmp_filename, sizeof(tmp_filename), stdin);
-		if (tmp_filename[0] != '\n')
+		user_request_string(tmp_filename, sizeof(tmp_filename), 0, "Please give the path to your .txt file or press enter to use the default calendar-file : ");
+		if (strlen(tmp_filename) != 0)
 		{
 			//user has specified a new filename, so use it.
-			tmp_filename[strlen(tmp_filename) - 1] = '\0';//remove \n
 			default_filename = tmp_filename;
 		}
 	}
 
-
-	FILE* h_calendar_file = fopen(default_filename, "r");
+	h_calendar_file = fopen(default_filename, "r");
 
 	//in case file has not been found
 	if (h_calendar_file == NULL)
@@ -912,15 +894,6 @@ void import_calendar_file(st_root* p_root, char* default_filename)
 		return;
 	}
 
-
-	if (p_root->pl_year != NULL)
-	{
-		int choice = get_user_confirmation("WARNING: You currently have an active calendar! Continuing will delete your current calendar.\nDo you wish to continue? (y/n) : ");
-		if (choice == 0)
-		{
-			return;
-		}
-	}
 	//first delete current tree
 	remove_appointments_in_range_or_all(p_root, 1, 0);
 
@@ -929,7 +902,7 @@ void import_calendar_file(st_root* p_root, char* default_filename)
 	{
 
 		//clear tmp struct
-		memset(&tmp_appointment, NULL, sizeof(tmp_appointment));
+		memset(&tmp_appointment, 0, sizeof(tmp_appointment));
 
 		// - - - - - - - - - - - - - - - -
 		//split the line in struct members
@@ -1066,33 +1039,36 @@ void import_calendar_file(st_root* p_root, char* default_filename)
 void export_calendar_file(st_root* p_root, char* default_filename)
 {
 
-	char tmp_filename[512];	//to store eventually manually entered filepath
+	char tmp_filename[512 + 2];	//to store eventually manually entered filepath + '\n' and nullbyte
+
+	st_year* p_year = p_root->pl_year;
+	if (p_year == NULL)
+	{
+		printf("Tree is empty! Nothing to export!\n");
+		return;
+	}
 
 	if (default_filename == NULL)
-	{	//If no filename is given, request the filepath+filename from user:
-		printf("Please give the path to your file:");
-		fgets(tmp_filename, sizeof(tmp_filename), stdin);
-		tmp_filename[strlen(tmp_filename) - 1] = '\0';
+	{	//If no filename is given, request the MANDATORY filepath+filename from user:
+		user_request_string(tmp_filename, sizeof(tmp_filename), 1, "Please give the path to your file: ");
 		default_filename = tmp_filename;
 	}
 	else
 	{	//We still offer the choice to override the default filename
 		printf("Please give the path to your file or press enter to use the default calendar-file (%s) : ", default_filename);
-		fgets(tmp_filename, sizeof(tmp_filename), stdin);
-		if (tmp_filename[0] != '\n')
+		user_request_string(tmp_filename, sizeof(tmp_filename), 0, NULL);	//we print no message since we have printed it before :-)
+		if (strlen(tmp_filename) != 0)
 		{
 			//user has specified a new filename, so use it.
-			tmp_filename[strlen(tmp_filename) - 1] = '\0';//remove \n
 			default_filename = tmp_filename;
 		}
 	}
+
+	//Create file in writing mode.
 	FILE* h_calendar_file = fopen(default_filename, "w");
-
-	st_year* p_year = p_root->pl_year;
-
-	if (p_year == NULL)
-	{
-		printf("Tree is empty! Nothing to export!\n");
+	if (h_calendar_file == NULL)
+	{	//in case file creation has failed.
+		printf("Error with creating and opening file: %s\n", default_filename);
 		return;
 	}
 
@@ -1104,14 +1080,13 @@ void export_calendar_file(st_root* p_root, char* default_filename)
 			st_day* p_day = p_month->pl_day;
 			while (p_day != NULL)
 			{
-				//printf("Date: %04d/%02d/%02d\n", p_year->year, p_month->month, p_day->day);
 				st_appointment* p_appointment = p_day->pl_appointment;
 				while (p_appointment != NULL)
 				{
-					fprintf(h_calendar_file, "%s;%s;%s;%04d/%02d/%02d;%02d:%02d;%02d:%02d\n", p_appointment->p_title, p_appointment->p_description,
-						p_appointment->p_location_description, p_appointment->date.year, p_appointment->date.month,
-						p_appointment->date.day, p_appointment->time_start.hour, p_appointment->time_start.minute,
-						p_appointment->time_end.hour, p_appointment->time_end.minute);
+					fprintf(h_calendar_file, "%s;%s;%s;%04d/%02d/%02d;%02d:%02d;%02d:%02d;%d\n", p_appointment->p_title, p_appointment->p_description,
+							p_appointment->p_location_description, p_appointment->date.year, p_appointment->date.month,
+							p_appointment->date.day, p_appointment->time_start.hour, p_appointment->time_start.minute,
+							p_appointment->time_end.hour, p_appointment->time_end.minute, p_appointment->id);
 					p_appointment = p_appointment->pl_next_appointment;
 
 				}
@@ -1125,6 +1100,8 @@ void export_calendar_file(st_root* p_root, char* default_filename)
 	printf("Export completed!\n");
 
 }
+
+
 /**
 * @brief	Adds an appointment to the calendar (by user input)
 * @param	p_root (st_root*) The address of the root struct
@@ -1139,60 +1116,18 @@ void add_appointment_manually(st_root* p_root)
 	char description[MAX_DESCRIPTION_LENGTH + 1];
 	char location_description[MAX_LOCATION_LENGTH + 1];
 
-	//get title of appointment
-	fgets_s(title, sizeof(title), stdin, 1, "Give the title of your appointment: ");
-	//printf("Give the title of your appointment: ");
-
-	//fgets(title, sizeof(title), stdin);
-
-	//while ((strlen(title) - 1 == 0) ||
-	//	(strlen(title) - 1 > MAX_TITLE_LENGTH) ||
-	//	title[strlen(title) - 1] != '\n')
-	//{
-	//	printf("Title of entry was empty or was longer than %d characters! Please try again: ", MAX_TITLE_LENGTH - 1); 
-	//	if (title[strlen(title) - 1] != '\n')
-	//	{
-	//		flush_keyboard_input();
-	//	}
-	//	fgets(title, sizeof(title), stdin);
-	//}
-	////remove '\n'
-	//title[strlen(title) - 1] = '\0';
-
+	//get title of appointment (MANDATORY)
+	user_request_string(title, sizeof(title), 1, "Give the title of your appointment: ");
 	new_appointment.p_title = malloc_s(strlen(title) + 1); // malloc + 1 for nullbyte
 	strcpy(new_appointment.p_title, title);
 
 	//get optional description
-	fgets_s(description, sizeof(description), stdin, 0, "Give an optional description of your appointment: ");
-	//printf("Give an optional description of your appointment: ");
-
-	//fgets(description, sizeof(description), stdin);
-
-	//while (strlen(description) - 1 > MAX_DESCRIPTION_LENGTH)
-	//{
-	//	printf("Description of entry was longer than %d characters! Please try again: ", MAX_DESCRIPTION_LENGTH - 1);
-	//	fgets(title, sizeof(title), stdin);
-	//}
-	////remove '\n'
-	//description[strlen(description) - 1] = '\0';
-
+	user_request_string(description, sizeof(description), 0, "Give an optional description of your appointment: ");
 	new_appointment.p_description = malloc_s(strlen(description) + 1); // malloc + 1 for nullbyte
 	strcpy(new_appointment.p_description, description);
 
 	//get optional location description
-	fgets_s(location_description, sizeof(location_description), stdin, 0, "Give an optional location descrption of your appointment: ");
-	//printf("Give an optional location description of your appointment: ");
-
-	//fgets(location_description, sizeof(location_description), stdin);
-
-	//while (strlen(location_description) - 1 > MAX_LOCATION_LENGTH)
-	//{
-	//	printf("Location description of entry was longer than %d characters! Please try again: ", MAX_LOCATION_LENGTH - 1);
-	//	fgets(title, sizeof(title), stdin);
-	//}
-	////remove '\n'
-	//location_description[strlen(location_description) - 1] = '\0';
-
+	user_request_string(location_description, sizeof(location_description), 0, "Give an optional location descrption of your appointment: ");
 	new_appointment.p_location_description = malloc_s(strlen(location_description) + 1); // malloc + 1 for nullbyte
 	strcpy(new_appointment.p_location_description, location_description);
 
@@ -1242,6 +1177,15 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 		
 		return;
 	}
+	else if (remove_all != 0)
+	{	//ask confirmation
+		int choice = user_request_confirmation("WARNING: You currently have an active calendar! Continuing will delete your current calendar.\nDo you wish to continue? (y/n) : ");
+		if (choice == 0)
+		{
+			return;
+		}
+	}
+
 
 	//preset structures to 0, to avoid garbage in case of remove_all
 	memset(&start_date, 0, sizeof(start_date));
@@ -1334,9 +1278,7 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 							{	//if first day is in range
 								p_month->pl_day = backup_pl_next_day;
 							}
-
 						}
-
 						else
 						{	//when day is not in range, refresh backup pointer
 							p_last_day_before_range = p_day;
@@ -1357,11 +1299,8 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 						{	//if first month is in range
 							p_year->pl_month = backup_pl_next_month;
 						}
-
 					}
-
 				}
-
 				else
 				{	//when month is out of range, refresh backup pointer
 					p_last_month_before_range = p_month;
@@ -1382,7 +1321,6 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 				{	//first year is in range
 					p_root->pl_year = backup_pl_next_year;
 				}
-
 			}
 		}
 		else
@@ -1413,10 +1351,12 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 
 
 // TODO: import and export file (remove the absolute paths of the default file)
+// TODO: compile for Linux !!!!!
+// TODO: convert all ints to unsigned integers where possible. (at least mention it lowkey)
 // TODO: add appointment function (done)
 // TODO: print calendar function (done)
 // TODO: remove calendar function (done)
 // TODO: what to do with same time appoitnment (done)
-// TODO: CATCH MALLOC ERRORS
-// TODO: CHECK FGETS AND SCANF ERRORS (LIKE IF ITS EMPTY OR IF IT HAS EXCEEDED)
+// TODO: CATCH MALLOC ERRORS (done)
+// TODO: CHECK FGETS AND SCANF ERRORS (LIKE IF ITS EMPTY OR IF IT HAS EXCEEDED) (done for fgets)
 
