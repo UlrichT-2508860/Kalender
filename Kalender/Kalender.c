@@ -881,7 +881,8 @@ void import_calendar_file(st_root* p_root, char* default_filename)
 	}
 	else
 	{	//We still offer the choice to override the default filename
-		user_request_string(tmp_filename, sizeof(tmp_filename), 0, "Please give the path to your .txt file or press enter to use the default calendar-file : ");
+		printf("Please give the path to your .txt file or press enter to use the default calendar-file (%s) : ", default_filename);
+		user_request_string(tmp_filename, sizeof(tmp_filename), 0, NULL);
 		if (strlen(tmp_filename) != 0)
 		{
 			//user has specified a new filename, so use it.
@@ -898,8 +899,17 @@ void import_calendar_file(st_root* p_root, char* default_filename)
 		return;
 	}
 
-	//first delete current tree
-	remove_appointments_in_range_or_all(p_root, 1, 0);
+	//If present, first ask for user confirmation to delete current calendar-tree.
+	if (p_root->pl_year != NULL)
+	{
+		int choice = user_request_confirmation("WARNING: You currently have an active calendar! Continuing will delete your current calendar.\nDo you wish to continue? (y/n) : ");
+		if (choice == 0)
+		{
+			return;	//User cancelled the deletion, so exit import.
+		}
+		remove_appointments_in_range_or_all(p_root, 1, 0);
+	}
+
 
 	//get each line (entry) and convert to struct
 	while (fgets(s_line, sizeof(s_line), h_calendar_file) != NULL)
@@ -1181,14 +1191,14 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 		
 		return;
 	}
-	else if (remove_all != 0)
-	{	//ask confirmation
-		int choice = user_request_confirmation("WARNING: You currently have an active calendar! Continuing will delete your current calendar.\nDo you wish to continue? (y/n) : ");
-		if (choice == 0)
-		{
-			return;
-		}
-	}
+	//else if (remove_all != 0)
+	//{	//ask confirmation
+	//	int choice = user_request_confirmation("WARNING: You currently have an active calendar! Continuing will delete your current calendar.\nDo you wish to continue? (y/n) : ");
+	//	if (choice == 0)
+	//	{
+	//		return;
+	//	}
+	//}
 
 
 	//preset structures to 0, to avoid garbage in case of remove_all

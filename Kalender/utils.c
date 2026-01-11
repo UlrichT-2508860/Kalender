@@ -56,7 +56,7 @@ void* malloc_s(size_t size)
 void flush_keyboard_input(void)
 {
 	char c;
-	//todo: change this function so that it wipes out everything in the input-buffer and does not wait until something is typed.
+	//todo: perhaps change this function so that it wipes out everything in the input-buffer and does not wait until something is typed.
 	do
 	{
 		c = getchar();

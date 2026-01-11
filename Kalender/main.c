@@ -61,6 +61,15 @@ int process_menu_option(st_root* p_root, int choice)
 		break;
 
 	case EMPTY_CALENDAR:
+		//If present, first ask for user confirmation to delete current calendar-tree.
+		if (p_root->pl_year != NULL)
+		{
+			int del_choice = user_request_confirmation("WARNING: You currently have an active calendar! Continuing will delete your current calendar.\nDo you wish to continue? (y/n) : ");
+			if (del_choice == 0)
+			{
+				break;
+			}
+		}
 		remove_appointments_in_range_or_all(p_root, 1, 1);
 		break;
 
