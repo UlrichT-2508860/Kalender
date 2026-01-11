@@ -913,6 +913,14 @@ void import_calendar_file(st_root* p_root, char* default_filename)
 	}
 
 
+	if (p_root->pl_year != NULL)
+	{
+		int choice = get_user_confirmation("WARNING: You currently have an active calendar! Continuing will delete your current calendar.\nDo you wish to continue? (y/n) : ");
+		if (choice == 0)
+		{
+			return;
+		}
+	}
 	//first delete current tree
 	remove_appointments_in_range_or_all(p_root, 1, 0);
 
