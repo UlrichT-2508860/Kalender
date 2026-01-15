@@ -611,7 +611,8 @@ void user_request_time(st_time* p_time, char* p_message)
 	//print a message (if not NULL) and get the time.
 	if (p_message != NULL)
 	{
-		printf(p_message);
+		//printf(p_message);
+		printf("%s", p_message);	//to avoid Linux warning: "format string is not a string literal"
 	}
 	scanf_result = scanf("%d:%d", &p_time->hour, &p_time->minute);
 	flush_keyboard_input();	//flush remaining keyboard input (including \n).
@@ -676,7 +677,8 @@ void user_request_date(st_date* p_date, char* p_message)
 	int scanf_result;
 	if (p_message != NULL)
 	{	//print a message (if not NULL)
-		printf(p_message);
+		//printf(p_message);
+		printf("%s", p_message);	//to avoid Linux warning: "format string is not a string literal"
 	}
 	scanf_result = scanf("%d/%d/%d", &p_date->year, &p_date->month, &p_date->day);	//get the date
 	flush_keyboard_input();	//flush remaining keyboard input (including \n).
@@ -752,7 +754,7 @@ void print_appointments_in_range_or_all(st_root* p_root, int print_all)
 {
 	st_date start_date;
 	st_date end_date;
-	int dates_valid = 0;
+	//int dates_valid = 0;
 	int start_date_in_days=0;
 	int start_year_month_in_days = 0;
 	int end_date_in_days = 0;
@@ -1174,7 +1176,7 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 
 	st_date start_date;
 	st_date end_date;
-	int dates_valid = 0;
+	//int dates_valid = 0;
 	int start_date_in_days = 0;
 	int end_date_in_days = 0;
 	int start_year_month_in_days = 0;
@@ -1185,7 +1187,7 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 	if (p_year == NULL)
 	{
 		if (print_details != 0)
-		{
+		{	
 			printf("Calendar is empty! Nothing to delete!\n");
 		}
 		

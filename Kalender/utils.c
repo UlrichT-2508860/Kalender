@@ -59,7 +59,7 @@ void flush_keyboard_input(void)
 	//todo: perhaps change this function so that it wipes out everything in the input-buffer and does not wait until something is typed.
 	do
 	{
-		c = getchar();
+		c = (char) getchar();
 	} while ((c != '\n') && (c != EOF));
 
 }
@@ -74,16 +74,8 @@ void flush_keyboard_input(void)
 */
 void user_wait_for_Enter_Press(void)
 {
-#if 1
 	//same as flush_keyboard_input()??
 	flush_keyboard_input();
-#else
-	char c;
-	do
-	{
-		c = getchar();
-	} while ((c != '\n') && (c != EOF));
-#endif
 }
 
 
@@ -96,7 +88,7 @@ void user_wait_for_Enter_Press(void)
 */
 char getchar_s(void)
 {
-	char c = getchar();	//getchar always returns a character or a \n and leaves a \n in the stdin-buffer.
+	char c = (char) getchar();	//getchar always returns a character or a \n and leaves a \n in the stdin-buffer.
 	if (c != '\n')
 	{	//clean up all residues in stdin.
 		flush_keyboard_input();	//flush remaining keyboard input (including \n).
@@ -159,9 +151,9 @@ char* my_strtok(char* str, const char* delimiter)
 */
 void string_to_lower(char* string)
 {
-	for (int i = 0; i < strlen(string); i++)
+	for (size_t i = 0; i < strlen(string); i++)
 	{
-		string[i] = tolower(string[i]);
+		string[i] = (char) tolower(string[i]);
 	}
 }
 
@@ -180,7 +172,8 @@ void fgets_s(char* p_destination, int max_size, FILE* stream, int mandatory_inpu
 
 	if (p_message != NULL)
 	{	//print a message (if not NULL)
-		printf(p_message);
+		//printf(p_message);
+		printf("%s", p_message);	//to avoid Linux warning: "format string is not a string literal"
 	}
 
 	do
@@ -229,7 +222,8 @@ int user_request_confirmation(char* p_message)
 {
 	if (p_message != NULL)
 	{
-		printf(p_message);
+		//printf(p_message);
+		printf("%s", p_message);	//to avoid Linux warning: "format string is not a string literal"
 	}
 	else
 	{
@@ -238,7 +232,7 @@ int user_request_confirmation(char* p_message)
 
 	while(1)
 	{	//Do always the following until a 'y' or 'n' character has been typed.
-		char c = tolower(getchar_s());		//ask for a character + ENTER and then lower the character.
+		char c = (char) tolower(getchar_s());		//ask for a character + ENTER and then lower the character.
 		if (c == 'y')
 		{
 			printf("You decided to continue.\n");

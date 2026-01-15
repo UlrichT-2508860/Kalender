@@ -90,6 +90,7 @@ int process_menu_option(st_root* p_root, int choice)
 	case IMPORT_CALENDAR:
 
 		//import_calendar_file(p_root, "C:\\Users\\ulric\\OneDrive\\Dokumente\\Ulrich Tuts\\Universiteit\\2025 - 2026\\Problem Solving\\Kwartiel 2\\Individueel project\\Kalender\\Kalender\\Kalender_data.txt");
+		//TODO: to include the data file in the project folder
 		import_calendar_file(p_root, "C:\\Program Files Ulrich\\Kalender_data.txt");
 		//import_calendar_file(p_root, NULL);
 		break;
@@ -117,6 +118,13 @@ int main(void)
 	int choice;
 	int processed_choice;
 
+//#ifdef __linux__
+	setvbuf(stdout, NULL, _IONBF, 0);	//This way Linux will not buffer the stdout, which will print my messages.
+										//Source: https://stackoverflow.com/questions/24095701/how-does-work-setvbuf-in-c
+//#endif
+
+	clearscreen();		//Start with a clear screen
+
 	printf("Welcome back user!\n");
 
 	init_root(&root);	//Always init the calendar-root when the program starts
@@ -135,15 +143,8 @@ int main(void)
 			printf("Press ENTER to return to menu.\n");
 
 			//flush all remaining characters for next input
-#if 1
 			user_wait_for_Enter_Press();	
-#else
-			char c;
-			do
-			{
-				c = getchar();
-			} while (c != '\n');
-#endif
+
 			// repeat menu but first clear screen.
 			clearscreen();
 		}
