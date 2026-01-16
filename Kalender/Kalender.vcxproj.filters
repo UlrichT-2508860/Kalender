@@ -24,12 +24,24 @@
     <ClCompile Include="utils.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="kalender_user.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="utils_date_time.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Kalender.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="kalender_user.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utils_date_time.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

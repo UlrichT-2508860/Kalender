@@ -3,6 +3,7 @@
 #include <string.h>
 #include "utils.h"
 #include "Kalender.h"
+#include "kalender_user.h"
 
 
 
@@ -16,6 +17,7 @@ static int write_menu_and_get_option(void)
 {
 
 	printf("What would you like to do?\n"
+		"----------------------------------------------------\n"
 		"[0] Exit Program\n"
 		"[1] Add appointment\n"
 		"[2] Remove appointments in a range\n"
@@ -24,7 +26,9 @@ static int write_menu_and_get_option(void)
 		"[5] Display appointments in a range\n"
 		"[6] Display appointments based on textual matching\n"
 		"[7] Import Calendar\n"
-		"[8] Export Calendar\n");
+		"[8] Export Calendar\n"
+		"----------------------------------------------------\n"
+		"Enter option and press ENTER to confirm: ");
 
 	int choice;
 	if (scanf("%d", &choice) != 1)
@@ -42,7 +46,7 @@ static int write_menu_and_get_option(void)
 * @param	Choice (int) The choice the user gave as input
 * @return	Processed choice (int) The choice input that has been processed  
 */
-int process_menu_option(st_root* p_root, int choice)
+static int process_menu_option(st_root* p_root, int choice)
 {
 	switch (choice)
 	{
