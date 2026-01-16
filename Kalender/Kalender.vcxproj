@@ -130,12 +130,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Kalender.c" />
+    <ClCompile Include="kalender_user.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="utils.c" />
+    <ClCompile Include="utils_date_time.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Kalender.h" />
+    <ClInclude Include="kalender_user.h" />
     <ClInclude Include="utils.h" />
+    <ClInclude Include="utils_date_time.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
