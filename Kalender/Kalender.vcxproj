@@ -141,6 +141,9 @@
     <ClInclude Include="utils.h" />
     <ClInclude Include="utils_date_time.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="Kalender_data.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

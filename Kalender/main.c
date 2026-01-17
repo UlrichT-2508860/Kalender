@@ -1,3 +1,5 @@
+// Student: Ulrich Tuts
+// Nummer: 2058860
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -51,9 +53,7 @@ static int process_menu_option(st_root* p_root, int choice)
 	switch (choice)
 	{
 	case EXIT_PROGRAM:
-
 		printf("Exiting...\n");
-
 		return 0;
 
 	case CREATE_APPOINTMENT:
@@ -86,16 +86,12 @@ static int process_menu_option(st_root* p_root, int choice)
 		break;
 
 	case WRITE_CALENDAR_MATCH:
-
 		print_appointments_with_match(p_root);
-
 		break;
 
 	case IMPORT_CALENDAR:
-
-		//import_calendar_file(p_root, "C:\\Users\\ulric\\OneDrive\\Dokumente\\Ulrich Tuts\\Universiteit\\2025 - 2026\\Problem Solving\\Kwartiel 2\\Individueel project\\Kalender\\Kalender\\Kalender_data.txt");
 		//TODO: to include the data file in the project folder
-		import_calendar_file(p_root, "C:\\Program Files Ulrich\\Kalender_data.txt");
+		import_calendar_file(p_root, "Kalender_data.txt");
 		//import_calendar_file(p_root, NULL);
 		break;
 
@@ -111,7 +107,6 @@ static int process_menu_option(st_root* p_root, int choice)
 	}
 
 	return choice;
-
 }
 
 
@@ -126,7 +121,6 @@ int main(void)
 	setvbuf(stdout, NULL, _IONBF, 0);	//This way Linux will not buffer the stdout, which will print my messages.
 										//Source: https://stackoverflow.com/questions/24095701/how-does-work-setvbuf-in-c
 //#endif
-
 	clearscreen();		//Start with a clear screen
 
 	printf("Welcome back user!\n");

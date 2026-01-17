@@ -81,7 +81,8 @@ enum menu_choices
 
 enum error_codes
 {
-	IMPORT_ERROR_TITLE = 1,
+	IMPORT_OK = 0,
+	IMPORT_ERROR_TITLE,
 	IMPORT_ERROR_DESCRIPTION,
 	IMPORT_ERROR_LOCATION,
 	IMPORT_ERROR_DATE,
@@ -106,7 +107,8 @@ void print_appointments_with_match(st_root* p_root); //TODO:  FIX THIS WEIRD WAR
 void print_appointments_in_range_or_all(st_root* p_root, int print_all);
 
 void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int print_details);
-void import_calendar_file(st_root* p_root, char* filename);
-void export_calendar_file(st_root* p_root, char* filename);
+
+int read_calendar_from_file(st_root* p_root, FILE* h_calendar_file, int* line_counter);
+void write_calendar_to_file(st_root* p_root, FILE* h_calendar_file);
 
 #endif

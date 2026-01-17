@@ -1,3 +1,5 @@
+// Student: Ulrich Tuts
+// Nummer: 2058860
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -104,7 +106,7 @@ char getchar_s(void)
 *			It is based on the same principles of the original sttrtok:
 *			 - ptr str must contain a non-NULL value to start the search over str for finding the first token.
 *			 - during all next calls, ptr str must be set to NULL so that the function knows that it must use its previously saved internal static variable end to start the search for the next token.
-* @param	str (char*) the address of a given string
+* @param	str (char*) the address of a given string when starting the search, if NULL it will continue with the previous saved end value.
 * @param	delimiter (const char*) a pointer to a constant delimiter-character
 * @return	char* a pointer to the found token (NULL if no more tokens found.
 */

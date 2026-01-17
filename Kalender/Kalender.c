@@ -1,3 +1,5 @@
+// Student: Ulrich Tuts
+// Nummer: 2058860
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -559,14 +561,43 @@ void print_appointments_in_range_or_all(st_root* p_root, int print_all)
 }
 
 
+
+/**
+* @brief	Helper function thta reads the next string-member of the current line, checks for minimum and maximum stringlength, 
+*			if all OK it will allocate memory (using malloc) and it will copy the string-member to its new destination.
+*			the address of the nex string will be returned in the passed-in pointer p_dest
+*
+* @param	str (char*) the address of a given string when starting the search, if NULL it will continue with the previous saved end value.
+* @param	p_dest (char**) Address of the pointer that will point to the new allocated string.
+* @param	min_length (int) The minimum length of the member.
+* @param	max_length (int) The max length of the member.
+* @param	error_code (int) The given error code in case of an import error.
+* @return	import_result (int)
+*/
+int my_strtok_and_malloc_string(char* str, char** p_dest, int min_length, int max_length, int error_code)
+{
+	char* p_member = my_strtok(str, FILE_DELIMITER);	//read the next item from the line (seperated by delimiter).
+
+	if ((strlen(p_member) < min_length) ||				//If item string length is too small or..
+		(strlen(p_member) > max_length))				//too long:
+	{
+		return error_code;							//return error-code
+	}
+
+	*p_dest = malloc_s(strlen(p_member) + 1);	// malloc size of string + 1 for nullbyte
+	strcpy(*p_dest, p_member);					//copy string into destination
+	return IMPORT_OK;							//return OK.
+}
+
+
+
 /**
 * @brief	This function will import a calendar by using a txt file, reading it, and getting every member
-*			of an appointment struct. This function will crash when something invalid was read, it will delete
-*			the root afterwards.
+*			of an appointment struct. This function will stop when something invalid was read.
 *
 *			Appointment Record-structure in file:
 *			- - - - - - - - - - - - - - - - - - -
-*			The contents of one appointment is specified on one line. The different item of the appointment are 
+*			The contents of one appointment is specified on one line. The different item of the appointment are
 *			seperated via a ";" character. (This is the FILE_DELIMITER)
 *			the item order is fixed as follows:
 *
@@ -581,56 +612,20 @@ void print_appointments_in_range_or_all(st_root* p_root, int print_all)
 *				.
 *
 * @param	p_root (st_root*) The address of the root struct
-* @param	default_filename (char*) The default filename, could be NULL
-* @return	void
+* @param	h_calendar_file (FILE*) The handler to the opened file
+* @param	line_counter (int*) Address of the line counter
+* @return	import_result (int)
 */
-void import_calendar_file(st_root* p_root, char* default_filename)
+int read_calendar_from_file(st_root* p_root, FILE* h_calendar_file, int* line_counter)
 {
-	FILE* h_calendar_file;
-	char tmp_filename[512 + 2];	//to store eventually manually entered filepath + '\n' and nullbyte
 	int scanf_result;			//for checking scanf result
-	int import_error = 0;		//for keeping errors during import
-	int line_counter = 1;	
+	int import_result = 0;		//for keeping errors during import
 	st_appointment tmp_appointment;
-	char s_line[ MAX_TITLE_LENGTH + MAX_LOCATION_LENGTH + MAX_DESCRIPTION_LENGTH + DATE_STR_LENGTH + (TIME_STR_LENGTH*2) + ID_STR_LENGTH + 10]; //use the size of the struct plus some extra characters for the separators.
-	
-	//TODO: MAKE THIS A FUNCTION
-	if (default_filename == NULL)
-	{	//If no filename is given, request the filepath+filename from user:
-		user_request_string(tmp_filename, sizeof(tmp_filename), 1, "Please give the path to your .txt file: ");
-		default_filename = tmp_filename;
-	}
-	else
-	{	//We still offer the choice to override the default filename
-		printf("Please give the path to your .txt file or press ENTER to use the default calendar-file (%s) : ", default_filename);
-		user_request_string(tmp_filename, sizeof(tmp_filename), 0, NULL);
-		if (strlen(tmp_filename) != 0)
-		{
-			//user has specified a new filename, so use it.
-			default_filename = tmp_filename;
-		}
-	}
+	char s_line[MAX_TITLE_LENGTH + MAX_LOCATION_LENGTH + MAX_DESCRIPTION_LENGTH + DATE_STR_LENGTH + (TIME_STR_LENGTH * 2) + ID_STR_LENGTH + 10]; //use the size of the struct plus some extra characters for the separators.
+	*line_counter = 1;
 
-	h_calendar_file = fopen(default_filename, "r");
-
-	//in case file has not been found
-	if (h_calendar_file == NULL)
-	{
-		printf("Error with opening file: %s\n", default_filename);
-		return;
-	}
-
-	//If present, first ask for user confirmation to delete current calendar-tree.
-	if (p_root->pl_year != NULL)
-	{
-		int choice = user_request_confirmation("WARNING: You currently have an active calendar! Continuing will delete your current calendar.\nDo you wish to continue? (y/n) : ");
-		if (choice == 0)
-		{
-			return;	//User cancelled the deletion, so exit import.
-		}
-		remove_appointments_in_range_or_all(p_root, 1, 0);
-	}
-
+	//First delete current tree.
+	remove_appointments_in_range_or_all(p_root, 1, 0);
 
 	//get each line (entry) and convert to struct
 	while (fgets(s_line, sizeof(s_line), h_calendar_file) != NULL)
@@ -642,57 +637,44 @@ void import_calendar_file(st_root* p_root, char* default_filename)
 		// - - - - - - - - - - - - - - - -
 		//split the line in struct members
 		// - - - - - - - - - - - - - - - -
+		char* p_member;
 		//get title (first member)
-		char* p_member = my_strtok(s_line, FILE_DELIMITER);
-		if ((strlen(p_member) == 0) || 
-			(strlen(p_member) > MAX_TITLE_LENGTH))
+		if ((import_result = my_strtok_and_malloc_string(s_line, &tmp_appointment.p_title, 1, MAX_TITLE_LENGTH, IMPORT_ERROR_TITLE)) != IMPORT_OK)
 		{
-			import_error = IMPORT_ERROR_TITLE; //Mark as error
-			break;
+			break;	//Cancel import-loop if error occured.
 		}
-		tmp_appointment.p_title = malloc_s(strlen(p_member) + 1); // malloc size of string + 1 for nullbyte
-		//TODO CHECK IF MALLOC FAILED (NULL)
-		strcpy(tmp_appointment.p_title, p_member);
-
+	
 		//get description (second member)
-		p_member = my_strtok(NULL, FILE_DELIMITER);
-		if (strlen(p_member) > MAX_DESCRIPTION_LENGTH)
+		if ((import_result = my_strtok_and_malloc_string(NULL, &tmp_appointment.p_description, 0, MAX_DESCRIPTION_LENGTH, IMPORT_ERROR_DESCRIPTION)) != IMPORT_OK)
 		{
-			import_error = IMPORT_ERROR_DESCRIPTION;
-			break;
+			break;	//Cancel import-loop if error occured.
 		}
-		tmp_appointment.p_description = malloc_s(strlen(p_member) + 1); // malloc size of string + 1 for nullbyte
-		//TODO CHECK IF MALLOC FAILED (NULL)
-		strcpy(tmp_appointment.p_description, p_member);
 
 		//get location (third member)
-		p_member = my_strtok(NULL, FILE_DELIMITER);
-		if (strlen(p_member) > MAX_LOCATION_LENGTH)
+		if ((import_result = my_strtok_and_malloc_string(NULL, &tmp_appointment.p_location_description, 0, MAX_LOCATION_LENGTH, IMPORT_ERROR_LOCATION)) != IMPORT_OK)
 		{
-			import_error = IMPORT_ERROR_LOCATION;
-			break;
+			break;	//Cancel import-loop if error occured.
 		}
-		tmp_appointment.p_location_description = malloc_s(strlen(p_member) + 1); // malloc size of string + 1 for nullbyte
-		//TODO CHECK IF MALLOC FAILED (NULL)
-		strcpy(tmp_appointment.p_location_description, p_member);
-
+		
 		//get date (fourth member)
+		//TODO: make this a function my_strtok_and_get_date ??
 		p_member = my_strtok(NULL, FILE_DELIMITER);
 		scanf_result = sscanf(p_member, "%d/%d/%d", &tmp_appointment.date.year, &tmp_appointment.date.month, &tmp_appointment.date.day);
 		if ((scanf_result != 3) ||	//bad structure?
-			(is_date_valid(&tmp_appointment.date) != 0) )	//check for invalid data
+			(is_date_valid(&tmp_appointment.date) != 0))	//check for invalid data
 		{
-			import_error = IMPORT_ERROR_DATE;//Mark as error
+			import_result = IMPORT_ERROR_DATE;//Mark as error
 			break;	//Cancel import-loop.
 		}
 
 		//get time start (fifth member)
+		//TODO: make this a function my_strtok_and_get_time ??
 		p_member = my_strtok(NULL, FILE_DELIMITER);
 		scanf_result = sscanf(p_member, "%d:%d", &tmp_appointment.time_start.hour, &tmp_appointment.time_start.minute);
 		if ((scanf_result != 2) ||	//bad structure?
-			(is_time_valid(&tmp_appointment.time_start) != 0) )	//invalid time??
+			(is_time_valid(&tmp_appointment.time_start) != 0))	//invalid time??
 		{
-			import_error = IMPORT_ERROR_START_TIME;	//Mark as error
+			import_result = IMPORT_ERROR_START_TIME;	//Mark as error
 			break;	//Cancel import-loop.
 		}
 
@@ -701,9 +683,9 @@ void import_calendar_file(st_root* p_root, char* default_filename)
 		scanf_result = sscanf(p_member, "%d:%d", &tmp_appointment.time_end.hour, &tmp_appointment.time_end.minute);
 		if ((scanf_result != 2) ||	//bad structure?
 			(is_time_valid(&tmp_appointment.time_end) != 0) ||
-			(is_end_time_valid_to_start_time(&tmp_appointment.time_end, &tmp_appointment.time_start)) )	//invalid time??
+			(is_end_time_valid_to_start_time(&tmp_appointment.time_end, &tmp_appointment.time_start)))	//invalid time??
 		{
-			import_error = IMPORT_ERROR_END_TIME;	//Mark as error
+			import_result = IMPORT_ERROR_END_TIME;	//Mark as error
 			break;	//Cancel import-loop.
 		}
 
@@ -712,100 +694,33 @@ void import_calendar_file(st_root* p_root, char* default_filename)
 		scanf_result = sscanf(p_member, "%d", &tmp_appointment.id);
 		if ((scanf_result != 1)) 	//bad structure?
 		{
-			import_error = IMPORT_ERROR_ID;	//Mark as error
+			import_result = IMPORT_ERROR_ID;	//Mark as error
 			break;	//Cancel import-loop.
 		}
 
 		// - - - - - - - - - - - - - - - - - - - 
 		// Save Temp-struct to the tree structure
 		// - - - - - - - - - - - - - - - - - - - 
-		// 
 		add_appointment_to_tree(p_root, &tmp_appointment);
 
-		line_counter++;
+		//Increment line counter and repeat loop.
+		(*line_counter)++;
 
 	}
-	
-	if (import_error != 0)
-	{
-		printf("Error has occurred at line %d during import!\nCancelling import...\n", line_counter);
-		switch (import_error)
-		{
-			case IMPORT_ERROR_TITLE:
-				printf("Title of entry was empty or was longer than %d characters!\n", MAX_TITLE_LENGTH - 1);
-				break;
-			case IMPORT_ERROR_DESCRIPTION:
-				printf("Description was longer than %d characters!\n", MAX_DESCRIPTION_LENGTH - 1);
-				break;
-			case IMPORT_ERROR_LOCATION:
-				printf("Location was longer than %d characters!\n", MAX_LOCATION_LENGTH - 1);
-				break;
-			case IMPORT_ERROR_DATE:
-				printf("Date of entry was invalid!\n");
-				break;
-			case IMPORT_ERROR_START_TIME:
-				printf("Start time of entry was invalid!\n");
-				break;
-			case IMPORT_ERROR_END_TIME:
-				printf("End time of entry was invalid!\n");
-				break;
-			case IMPORT_ERROR_ID:
-				printf("ID of entry was invalid!\n");
-				break;
-			default:
-				printf("Something unexpected occurred!\n");
-		}
-		remove_appointments_in_range_or_all(p_root, 1, 1);	//remove partly imported tree 
-	}
-	else
-	{
-		printf("Import done!\n");
-	}
 
-	fclose(h_calendar_file);
+	return import_result;
 }
 
+
 /**
-* @brief	This function will take the current calendar tree and export it to a file
+* @brief	This function will take the current calendar tree and write it to an opened file.
 * @param	p_root (st_root*) The address of the root struct
-* @param	filename (char*) A pointer to the filename
+* @param	h_calendar_file (FILE*) A file handler
 * @return	void
 */
-void export_calendar_file(st_root* p_root, char* default_filename)
+void write_calendar_to_file(st_root* p_root, FILE* h_calendar_file)
 {
-
-	char tmp_filename[512 + 2];	//to store eventually manually entered filepath + '\n' and nullbyte
-
 	st_year* p_year = p_root->pl_year;
-	if (p_year == NULL)
-	{
-		printf("Tree is empty! Nothing to export!\n");
-		return;
-	}
-
-	if (default_filename == NULL)
-	{	//If no filename is given, request the MANDATORY filepath+filename from user:
-		user_request_string(tmp_filename, sizeof(tmp_filename), 1, "Please give the path to your file: ");
-		default_filename = tmp_filename;
-	}
-	else
-	{	//We still offer the choice to override the default filename
-		printf("Please give the path to your file or press ENTER to use the default calendar-file (%s) : ", default_filename);
-		user_request_string(tmp_filename, sizeof(tmp_filename), 0, NULL);	//we print no message since we have printed it before :-)
-		if (strlen(tmp_filename) != 0)
-		{
-			//user has specified a new filename, so use it.
-			default_filename = tmp_filename;
-		}
-	}
-
-	//Create file in writing mode.
-	FILE* h_calendar_file = fopen(default_filename, "w");
-	if (h_calendar_file == NULL)
-	{	//in case file creation has failed.
-		printf("Error with creating and opening file: %s\n", default_filename);
-		return;
-	}
 
 	while (p_year != NULL)
 	{
@@ -819,11 +734,10 @@ void export_calendar_file(st_root* p_root, char* default_filename)
 				while (p_appointment != NULL)
 				{
 					fprintf(h_calendar_file, "%s;%s;%s;%04d/%02d/%02d;%02d:%02d;%02d:%02d;%d\n", p_appointment->p_title, p_appointment->p_description,
-							p_appointment->p_location_description, p_appointment->date.year, p_appointment->date.month,
-							p_appointment->date.day, p_appointment->time_start.hour, p_appointment->time_start.minute,
-							p_appointment->time_end.hour, p_appointment->time_end.minute, p_appointment->id);
+						p_appointment->p_location_description, p_appointment->date.year, p_appointment->date.month,
+						p_appointment->date.day, p_appointment->time_start.hour, p_appointment->time_start.minute,
+						p_appointment->time_end.hour, p_appointment->time_end.minute, p_appointment->id);
 					p_appointment = p_appointment->pl_next_appointment;
-
 				}
 				p_day = p_day->pl_next_day;
 			}
@@ -831,9 +745,6 @@ void export_calendar_file(st_root* p_root, char* default_filename)
 		}
 		p_year = p_year->pl_next_year;
 	}
-	fclose(h_calendar_file);
-	printf("Export completed!\n");
-
 }
 
 
@@ -850,7 +761,6 @@ void export_calendar_file(st_root* p_root, char* default_filename)
 */
 void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int print_details)
 {
-
 	st_date start_date;
 	st_date end_date;
 	//int dates_valid = 0;
@@ -870,15 +780,7 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 		
 		return;
 	}
-	//else if (remove_all != 0)
-	//{	//ask confirmation
-	//	int choice = user_request_confirmation("WARNING: You currently have an active calendar! Continuing will delete your current calendar.\nDo you wish to continue? (y/n) : ");
-	//	if (choice == 0)
-	//	{
-	//		return;
-	//	}
-	//}
-
+	
 
 	//preset structures to 0, to avoid garbage in case of remove_all
 	memset(&start_date, 0, sizeof(start_date));
@@ -959,16 +861,14 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 								found++;
 							}
 
-							//appointments have been freed, now free day and re-link last day before range
+							//all appointments have been freed, now free day and re-link last day before range
 							free(p_day);
-
 							if (p_last_day_before_range != NULL)
-							{
+							{	//another day is before the deleted day -> relink to next day
 								p_last_day_before_range->pl_next_day = backup_pl_next_day;
 							}
-
 							else
-							{	//if first day is in range
+							{	//the deleted day was the first of the list -> relink month to next day (that will now become first day)
 								p_month->pl_day = backup_pl_next_day;
 							}
 						}
@@ -984,12 +884,11 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 						free(p_month);
 
 						if (p_last_month_before_range != NULL)
-						{
+						{	//another month is before the deleted month -> relink to next month
 							p_last_month_before_range->pl_next_month = backup_pl_next_month;
 						}
-
 						else
-						{	//if first month is in range
+						{	//the deleted month was the first of the list -> relink year to next month (that will now become first month)
 							p_year->pl_month = backup_pl_next_month;
 						}
 					}
@@ -1007,11 +906,11 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 				free(p_year);
 
 				if (p_last_year_before_range != NULL)
-				{
+				{	//another year is before the deleted year -> relink to next year
 					p_last_year_before_range->pl_next_year = backup_pl_next_year;
 				}
 				else
-				{	//first year is in range
+				{	//the deleted year was the first of the list -> relink root to next year (that will now become first year)
 					p_root->pl_year = backup_pl_next_year;
 				}
 			}

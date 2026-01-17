@@ -1,3 +1,5 @@
+// Student: Ulrich Tuts
+// Nummer: 2058860
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -194,5 +196,147 @@ void add_appointment_manually(st_root* p_root)
 
 	add_appointment_to_tree(p_root, &new_appointment);
 	printf("Appointment has been added to Calendar!\n");
+
+}
+
+/**
+* @brief	This function will import a calendar by using a txt file, reading it, and getting every member
+*			of an appointment struct. This function will stop and print an error message when something invalid was read and it will delete
+*			the root afterwards.
+*
+* 
+* @param	p_root (st_root*) The address of the root struct
+* @param	default_filename (char*) The default filename, could be NULL
+* @return	void
+*/
+void import_calendar_file(st_root* p_root, char* default_filename)
+{
+	FILE* h_calendar_file;
+	int import_result;
+	char tmp_filename[512 + 2];	//to store eventually manually entered filepath + '\n' and nullbyte
+	int line_counter;	
+
+	//If present, first ask for user confirmation to delete current calendar-tree.
+	if (p_root->pl_year != NULL)
+	{
+		int choice = user_request_confirmation("WARNING: You currently have an active calendar! Continuing will delete your current calendar.\nDo you wish to continue? (y/n) : ");
+		if (choice == 0)
+		{
+			return;	//User cancelled the deletion, so exit import.
+		}
+	}
+
+	//TODO: MAKE THIS A FUNCTION
+	if (default_filename == NULL)
+	{	//If no filename is given, request the filepath+filename from user:
+		user_request_string(tmp_filename, sizeof(tmp_filename), 1, "Please give the path + filename to your .txt file: ");
+		default_filename = tmp_filename;
+	}
+	else
+	{	//We still offer the choice to override the default filename
+		printf("Please give the path + filename or press ENTER to use the default calendar-file (%s) : ", default_filename);
+		user_request_string(tmp_filename, sizeof(tmp_filename), 0, NULL);
+		if (strlen(tmp_filename) != 0)
+		{
+			//user has specified a new filename, so use it.
+			default_filename = tmp_filename;
+		}
+	}
+
+	h_calendar_file = fopen(default_filename, "r");		//try to open file
+	if (h_calendar_file == NULL)
+	{	//in case file has not been found
+		printf("Error with opening file: %s\n", default_filename);
+		return;
+	}
+
+	import_result = read_calendar_from_file(p_root, h_calendar_file, &line_counter);
+
+	if (import_result!= 0)
+	{
+		printf("Error has occurred at line %d during import!\nCancelling import...\n", line_counter);
+		switch (import_result)
+		{
+		case IMPORT_ERROR_TITLE:
+			printf("Title of entry was empty or was longer than %d characters!\n", MAX_TITLE_LENGTH - 1);
+			break;
+		case IMPORT_ERROR_DESCRIPTION:
+			printf("Description was longer than %d characters!\n", MAX_DESCRIPTION_LENGTH - 1);
+			break;
+		case IMPORT_ERROR_LOCATION:
+			printf("Location was longer than %d characters!\n", MAX_LOCATION_LENGTH - 1);
+			break;
+		case IMPORT_ERROR_DATE:
+			printf("Date of entry was invalid!\n");
+			break;
+		case IMPORT_ERROR_START_TIME:
+			printf("Start time of entry was invalid!\n");
+			break;
+		case IMPORT_ERROR_END_TIME:
+			printf("End time of entry was invalid!\n");
+			break;
+		case IMPORT_ERROR_ID:
+			printf("ID of entry was invalid!\n");
+			break;
+		default:
+			printf("Something unexpected occurred!\n");
+		}
+		remove_appointments_in_range_or_all(p_root, 1, 1);	//remove partly imported tree 
+	}
+	else
+	{
+		printf("Import done!\n");
+	}
+
+	fclose(h_calendar_file);
+}
+
+
+/**
+* @brief	This function will take the current calendar tree and export it to a file
+* @param	p_root (st_root*) The address of the root struct
+* @param	filename (char*) A pointer to the filename
+* @return	void
+*/
+void export_calendar_file(st_root* p_root, char* default_filename)
+{
+
+	char tmp_filename[512 + 2];	//to store eventually manually entered filepath + '\n' and nullbyte
+
+	st_year* p_year = p_root->pl_year;
+	if (p_year == NULL)
+	{
+		printf("Tree is empty! Nothing to export!\n");
+		return;
+	}
+
+	if (default_filename == NULL)
+	{	//If no filename is given, request the MANDATORY filepath+filename from user:
+		user_request_string(tmp_filename, sizeof(tmp_filename), 1, "Please give the path + filename: ");
+		default_filename = tmp_filename;
+	}
+	else
+	{	//We still offer the choice to override the default filename
+		printf("Please give the path + filename or press ENTER to use the default calendar-file (%s) : ", default_filename);
+		user_request_string(tmp_filename, sizeof(tmp_filename), 0, NULL);	//we print no message since we have printed it before :-)
+		if (strlen(tmp_filename) != 0)
+		{
+			//user has specified a new filename, so use it.
+			default_filename = tmp_filename;
+		}
+	}
+
+	//Create file in writing mode.
+	FILE* h_calendar_file = fopen(default_filename, "w");
+	if (h_calendar_file == NULL)
+	{	//in case file creation has failed.
+		printf("Error with creating and opening file: %s\n", default_filename);
+		return;
+	}
+
+	write_calendar_to_file(p_root, h_calendar_file);
+
+	fclose(h_calendar_file);
+	printf("Export completed!\n");
 
 }
