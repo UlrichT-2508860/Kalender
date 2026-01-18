@@ -365,7 +365,6 @@ void add_appointment_to_tree(st_root* p_root, st_appointment* p_new_appointment)
 */
 void print_appointment_details(st_appointment* p_appointment)
 {
-	//printf("Date: %04d/%02d/%02d\n", p_year->year, p_month->month, p_day->day);
 	{
 		printf("  Title: %s\n", p_appointment->p_title);
 		printf("  ------");
@@ -373,15 +372,11 @@ void print_appointment_details(st_appointment* p_appointment)
 		{
 			printf("-");
 		}
-		//printf("\n");
 		printf("\n   Description: %s\n", p_appointment->p_description);
 		printf("   Location: %s\n", p_appointment->p_location_description);
-		//printf("  Date: %04d/%02d/%02d\n", p_appointment->date.year, p_appointment->date.month, p_appointment->date.day);
 		printf("   Start-time: %02d:%02d\n", p_appointment->time_start.hour, p_appointment->time_start.minute);
 		printf("   End-time: %02d:%02d\n", p_appointment->time_end.hour, p_appointment->time_end.minute);
 		printf("   Appointemnt ID: %d\n\n\n", p_appointment->id);
-		//printf("---------------------------------------\n");
-		//printf("\n");
 	}
 }
 
@@ -928,11 +923,9 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 
 // TODO: import and export file (remove the absolute paths of the default file) (done)
 // TODO: compile for Linux (done)
-// TODO: convert all ints to unsigned integers where possible. (at least mention it lowkey)
 // TODO: add appointment function (done)
 // TODO: print calendar function (done)
 // TODO: remove calendar function (done)
-// TODO: what to do with same time appoitnment (done)
 // TODO: CATCH MALLOC ERRORS (done)
 // TODO: CHECK FGETS AND SCANF ERRORS (LIKE IF ITS EMPTY OR IF IT HAS EXCEEDED) (done for fgets)
 
