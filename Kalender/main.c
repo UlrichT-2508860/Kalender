@@ -1,5 +1,5 @@
 // Student: Ulrich Tuts
-// Nummer: 2058860
+// Nummer: 2508860
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

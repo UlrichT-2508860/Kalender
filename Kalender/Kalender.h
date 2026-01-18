@@ -102,10 +102,9 @@ st_day* get_or_create_day(st_month* p_this_month, int day);
 st_appointment* get_and_create_appointment(st_day* p_this_day, st_time* p_time_start);
 void add_appointment_to_tree(st_root* p_root, st_appointment* p_new_appointment);
 void print_appointment_details(st_appointment* p_appointment);
-void print_appointments_with_match(st_root* p_root); //TODO:  FIX THIS WEIRD WARNING
+void print_appointments_with_match(st_root* p_root); 
 
 void print_appointments_in_range_or_all(st_root* p_root, int print_all);
-
 void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int print_details);
 
 int read_calendar_from_file(st_root* p_root, FILE* h_calendar_file, int* line_counter);

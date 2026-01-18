@@ -1,5 +1,5 @@
 // Student: Ulrich Tuts
-// Nummer: 2058860
+// Nummer: 2508860
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,7 +30,7 @@ void clearscreen(void)
 
 
 /**
-* @brief	A safe version of malloc. It will exit the program when an allocation error has occurred.
+* @brief	A safe version of malloc. ATTENTION: It will exit the program when an allocation error has occurred.
 * @param	size (size_t) The size of space you want to preserve for the allocation process.
 * @return	p_malloc_location (void*) The address of where the preserved memory is located.
 */
@@ -116,15 +116,15 @@ char* my_strtok(char* str, const char* delimiter)
 	static char* end = NULL;	//GLOBAL HIDDEN VARIABLE 
 
 	if (str == NULL)
-	{
+	{	//If strtok needs to continue on used string, check global variable 'end'.
 		if (end == NULL)
 		{
-			return NULL;	//if end-ptr a
+			return NULL;	//if end-ptr was never started, return NULL as safety.
 		}
-		start = end;
+		start = end;	
 	}
 	else
-	{
+	{	//If strtok is (re)started, set start-ptr to incoming string.
 		start = str;
 	}
 

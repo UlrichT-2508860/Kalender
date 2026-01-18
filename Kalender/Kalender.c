@@ -1,5 +1,5 @@
 // Student: Ulrich Tuts
-// Nummer: 2058860
+// Nummer: 2508860
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -64,7 +64,7 @@ st_year* get_or_create_year(st_root* p_this_root, int year)
 	//if nothing is present in the root, create the first year struct and return directly
 	if (tmp_year == NULL)
 	{
-		tmp_year = malloc_s(sizeof(st_month));
+		tmp_year = malloc_s(sizeof(st_year));
 		tmp_year->year = year;
 		tmp_year->pl_next_year = NULL;
 		tmp_year->pl_month = NULL;
@@ -91,37 +91,30 @@ st_year* get_or_create_year(st_root* p_this_root, int year)
 		tmp_new_year = malloc_s(sizeof(st_year));
 		tmp_new_year->year = year;
 		tmp_new_year->pl_month = NULL;
-
-
-		// 1) The wanted year needs to be inserted in the beginning
+		
 		if ((previous_tmp_year == NULL) && (tmp_year->year > year)) 
-		{
+		{	// The wanted year needs to be inserted in the beginning
 			tmp_new_year->pl_next_year = tmp_year;
 			p_this_root->pl_year = tmp_new_year;
 		}
 		else
 		{
 			if (tmp_year->year < year)
-			{
-				// 1) The wanted year is higher than the current year -> add new entry
+			{	// The wanted year is higher than the current year -> add new entry
 				tmp_year->pl_next_year = tmp_new_year;
 				tmp_new_year->pl_next_year = NULL;
 			}
 			else
-			{
-				// 1) The wanted year is lower than the current year. -> insert new entry (rewiring).
+			{	// The wanted year is lower than the current year. -> insert new entry (rewiring).
 				tmp_new_year->pl_next_year = tmp_year;
 				previous_tmp_year->pl_next_year = tmp_new_year;
 			}
 		}
+		//return new created year
+		return tmp_new_year;
 	}
-	else
-	{
-		return tmp_year;
-	}
-
-	//return p_this_root->pl_year;
-	return tmp_new_year;
+	//year already present, return pointer 
+	return tmp_year;
 }
 
 
@@ -167,33 +160,28 @@ st_month* get_or_create_month(st_year* p_this_year, int month)
 		tmp_new_month = malloc_s(sizeof(st_month));
 		tmp_new_month->month = month;
 		tmp_new_month->pl_day = NULL;
-
-		//the wanted month needs to be inserted in the beginning
+		
 		if ((previous_tmp_month == NULL) && (tmp_month->month > month))
-		{
+		{	//the wanted month needs to be inserted in the beginning
 			tmp_new_month->pl_next_month = tmp_month;
 			p_this_year->pl_month = tmp_new_month;
 		}
 		else
 		{
-			//the wanted month needs to be added
 			if (tmp_month->month < month)
-			{
+			{	//the wanted month needs to be added
 				tmp_new_month->pl_next_month = NULL;
 				tmp_month->pl_next_month = tmp_new_month;
 			}
-
-			//the wanted month needs to be inserted
 			else
-			{
+			{	//the wanted month needs to be inserted
 				tmp_new_month->pl_next_month = tmp_month;
 				previous_tmp_month->pl_next_month = tmp_new_month;
-
 			}
 		}
+		//return new created month
 		return tmp_new_month;
 	}
-
 	//month already present, return pointer 
 	return tmp_month;
 	
@@ -242,29 +230,25 @@ st_day* get_or_create_day(st_month* p_this_month, int day)
 		tmp_new_day->day = day;
 		tmp_new_day->pl_appointment = NULL;
 
-		//the wanted day needs to be inserted in the beginning
 		if ((previous_tmp_day == NULL) && (tmp_day->day > day))
-		{
+		{	//the wanted day needs to be inserted in the beginning
 			tmp_new_day->pl_next_day = tmp_day;
 			p_this_month->pl_day = tmp_new_day;
 		}
 		else
 		{
-			//the wanted day needs to be added
 			if (tmp_day->day < day)
-			{
+			{	//the wanted day needs to be added
 				tmp_new_day->pl_next_day = NULL;
 				tmp_day->pl_next_day = tmp_new_day;
 			}
-
-			//the wanted day needs to be inserted
 			else
-			{
+			{	//the wanted day needs to be inserted
 				tmp_new_day->pl_next_day = tmp_day;
 				previous_tmp_day->pl_next_day = tmp_new_day;
-
 			}
 		}
+		//return new created day
 		return tmp_new_day;
 	}
 	//day already present, return pointer 
@@ -274,7 +258,7 @@ st_day* get_or_create_day(st_month* p_this_month, int day)
 
 /**
 * @brief	This function will create dynamically a new appointment struct in a given days linked-list and sorts it based on the start time of the appointment.
-*			The appointment will update the linked list 
+*			The appointment will always be created (overlapping appointments are allowed(update the linked list ).
 * @param	p_this_day (st_day*) The address of the current day struct
 * @param	p_time_start (st_time*) The time when the appointment will start
 * @return	Address to new appointment struct (st_appointment*)
@@ -324,11 +308,6 @@ st_appointment* get_and_create_appointment(st_day* p_this_day, st_time* p_time_s
 	}
 	else
 	{
-		//if (tmp_appointment_time_start_in_minutes == time_start_in_minutes)
-		//{
-		//	__nop();
-		//}
-
 		if (tmp_appointment_time_start_in_minutes <= time_start_in_minutes)
 		{	//the appointment needs to be added in the back
 			tmp_new_appointment->pl_next_appointment = NULL;
@@ -388,15 +367,20 @@ void print_appointment_details(st_appointment* p_appointment)
 {
 	//printf("Date: %04d/%02d/%02d\n", p_year->year, p_month->month, p_day->day);
 	{
-		printf("\n APPOINTMENT: %d\n\n", p_appointment->id);
+		printf("  Title: %s\n", p_appointment->p_title);
+		printf("  ------");
+		for (size_t i = 0; i <= strlen(p_appointment->p_title); i++)	//Fill up with '-' to the total length of the title
+		{
+			printf("-");
+		}
 		//printf("\n");
-		printf("  Title: %s\n\n", p_appointment->p_title);
-		//printf("\n");
-		printf("   Description: %s\n", p_appointment->p_description);
+		printf("\n   Description: %s\n", p_appointment->p_description);
 		printf("   Location: %s\n", p_appointment->p_location_description);
 		//printf("  Date: %04d/%02d/%02d\n", p_appointment->date.year, p_appointment->date.month, p_appointment->date.day);
 		printf("   Start-time: %02d:%02d\n", p_appointment->time_start.hour, p_appointment->time_start.minute);
-		printf("   End-time: %02d:%02d\n\n", p_appointment->time_end.hour, p_appointment->time_end.minute);
+		printf("   End-time: %02d:%02d\n", p_appointment->time_end.hour, p_appointment->time_end.minute);
+		printf("   Appointemnt ID: %d\n\n\n", p_appointment->id);
+		//printf("---------------------------------------\n");
 		//printf("\n");
 	}
 }
@@ -442,7 +426,9 @@ void print_appointments_with_match(st_root* p_root)
 					string_to_lower(lowered_title);
 					if (strstr(lowered_title, match_string))
 					{
+						printf("----------------------------------------\n");
 						printf("Date: %04d/%02d/%02d\n", p_year->year, p_month->month, p_day->day);
+						printf("----------------------------------------\n");
 						print_appointment_details(p_appointment);
 						found = 1;
 					}
@@ -475,7 +461,6 @@ void print_appointments_in_range_or_all(st_root* p_root, int print_all)
 {
 	st_date start_date;
 	st_date end_date;
-	//int dates_valid = 0;
 	int start_date_in_days=0;
 	int start_year_month_in_days = 0;
 	int end_date_in_days = 0;
@@ -536,7 +521,9 @@ void print_appointments_in_range_or_all(st_root* p_root, int print_all)
 						if ((print_all != 0) ||																				//if print all is wanted or..
 							((start_date_in_days <= current_date_in_days) && (current_date_in_days <= end_date_in_days)))	//...if year+month+day in range
 						{
-							printf("Date: %04d/%02d/%02d\n\n", p_year->year, p_month->month, p_day->day);
+							printf("----------------------------------------\n");
+							printf("Date: %04d/%02d/%02d\n", p_year->year, p_month->month, p_day->day);
+							printf("----------------------------------------\n");
 							st_appointment* p_appointment = p_day->pl_appointment;
 							while (p_appointment != NULL)
 							{
@@ -563,18 +550,18 @@ void print_appointments_in_range_or_all(st_root* p_root, int print_all)
 
 
 /**
-* @brief	Helper function thta reads the next string-member of the current line, checks for minimum and maximum stringlength, 
+* @brief	Helper function that reads the next string-member of the current line, checks for minimum and maximum stringlength, 
 *			if all OK it will allocate memory (using malloc) and it will copy the string-member to its new destination.
 *			the address of the nex string will be returned in the passed-in pointer p_dest
 *
 * @param	str (char*) the address of a given string when starting the search, if NULL it will continue with the previous saved end value.
 * @param	p_dest (char**) Address of the pointer that will point to the new allocated string.
-* @param	min_length (int) The minimum length of the member.
-* @param	max_length (int) The max length of the member.
+* @param	min_length (size_t) The minimum length of the member.
+* @param	max_length (size_t) The max length of the member.
 * @param	error_code (int) The given error code in case of an import error.
 * @return	import_result (int)
 */
-int my_strtok_and_malloc_string(char* str, char** p_dest, int min_length, int max_length, int error_code)
+static int my_strtok_and_malloc_string(char* str, char** p_dest, size_t min_length, size_t max_length, int error_code)
 {
 	char* p_member = my_strtok(str, FILE_DELIMITER);	//read the next item from the line (seperated by delimiter).
 
@@ -763,7 +750,6 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 {
 	st_date start_date;
 	st_date end_date;
-	//int dates_valid = 0;
 	int start_date_in_days = 0;
 	int end_date_in_days = 0;
 	int start_year_month_in_days = 0;
@@ -846,17 +832,16 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 							st_appointment* p_appointment = p_day->pl_appointment;
 							while (p_appointment != NULL)
 							{
-
 								//if there is an appointment found, delete it and goto next
-								st_appointment* backup_pl_next_appointment = p_appointment->pl_next_appointment;
+
+								st_appointment* backup_pl_next_appointment = p_appointment->pl_next_appointment;	//backup first link to next one.
 		
 								//before we free the allocated appointment, free first the allocated strings
-								// TODO MAKE THIS A FUNCTION									
 								free(p_appointment->p_title);
 								free(p_appointment->p_description);
 								free(p_appointment->p_location_description);
 								free(p_appointment);
-								p_appointment = backup_pl_next_appointment;
+								p_appointment = backup_pl_next_appointment;	//take next apointment and repeat loop as long as not NULL
 
 								found++;
 							}
@@ -939,11 +924,10 @@ void remove_appointments_in_range_or_all(st_root* p_root, int remove_all, int pr
 	}
 }
 
-//#define remove_all_appointments(p_root)		remove_appointments_in_range_or_all(p_root, 1, 0)
 
 
-// TODO: import and export file (remove the absolute paths of the default file)
-// TODO: compile for Linux !!!!!
+// TODO: import and export file (remove the absolute paths of the default file) (done)
+// TODO: compile for Linux (done)
 // TODO: convert all ints to unsigned integers where possible. (at least mention it lowkey)
 // TODO: add appointment function (done)
 // TODO: print calendar function (done)

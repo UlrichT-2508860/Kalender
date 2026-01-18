@@ -1,5 +1,5 @@
 // Student: Ulrich Tuts
-// Nummer: 2058860
+// Nummer: 2508860
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -90,7 +90,6 @@ void user_request_date(st_date* p_date, char* p_message)
 	int scanf_result;
 	if (p_message != NULL)
 	{	//print a message (if not NULL)
-		//printf(p_message);
 		printf("%s", p_message);	//to avoid Linux warning: "format string is not a string literal"
 	}
 	scanf_result = scanf("%d/%d/%d", &p_date->year, &p_date->month, &p_date->day);	//get the date
@@ -226,7 +225,6 @@ void import_calendar_file(st_root* p_root, char* default_filename)
 		}
 	}
 
-	//TODO: MAKE THIS A FUNCTION
 	if (default_filename == NULL)
 	{	//If no filename is given, request the filepath+filename from user:
 		user_request_string(tmp_filename, sizeof(tmp_filename), 1, "Please give the path + filename to your .txt file: ");
@@ -250,6 +248,7 @@ void import_calendar_file(st_root* p_root, char* default_filename)
 		return;
 	}
 
+	//Import now all the lines from the data-file into the calender-tree.
 	import_result = read_calendar_from_file(p_root, h_calendar_file, &line_counter);
 
 	if (import_result!= 0)
@@ -334,6 +333,7 @@ void export_calendar_file(st_root* p_root, char* default_filename)
 		return;
 	}
 
+	//Now export the entire calender tree to the file.
 	write_calendar_to_file(p_root, h_calendar_file);
 
 	fclose(h_calendar_file);
