@@ -90,14 +90,10 @@ static int process_menu_option(st_root* p_root, int choice)
 		break;
 
 	case IMPORT_CALENDAR:
-		//TODO: to include the data file in the project folder
 		import_calendar_file(p_root, "Kalender_data.txt");
-		//import_calendar_file(p_root, NULL);
 		break;
 
 	case EXPORT_CALENDAR:
-		//export_calendar_file(p_root, "C:\\Users\\ulric\\OneDrive\\Dokumente\\Ulrich Tuts\\Universiteit\\2025 - 2026\\Problem Solving\\Kwartiel 2\\Individueel project\\Kalender\\Kalender\\lil_cuh.txt");
-		//export_calendar_file(p_root, "C:\\Program Files Ulrich\\new.txt");
 		export_calendar_file(p_root, NULL);
 		break;
 
